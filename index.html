@@ -3,502 +3,532 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Dino Quest</title>
+<title>Dino Quest — Arena</title>
 <style>
 :root{
-  --bg:#0b0f14;--panel:#121926;--panel2:#0f1520;--txt:#d8e1ff;
-  --gold:#f2c94c;--gems:#56ccf2;--hp:#22d3ee;--ring:#0c1320;--accent:#1f2937
+  --bg:#081018;--panel:#0f1826;--panel2:#0b1320;--txt:#e8f0ff;
+  --gold:#f6c960;--gems:#7dd3fc;--hp1:#22d3ee;--hp2:#38bdf8;
+  --ring:#0c1320;--glow:#1b5fff;--accent:#8b5cf6;--ok:#34d399;--warn:#fbbf24;
+  --rare:#60a5fa;--epic:#a78bfa;--legend:#f59e0b;--sup:#14b8a6;
 }
-*{box-sizing:border-box} body{margin:0;background:radial-gradient(1200px 600px at 50% 0%,#0f1624,#0b0f14 60%);color:var(--txt);font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
-a,button{cursor:pointer}
-.hud{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:10px;justify-content:space-between;padding:10px 12px;background:linear-gradient(180deg,#0f1624,#0e1420);border-bottom:1px solid #162238}
-.brand{font-weight:800;letter-spacing:.5px}
-.badge{display:flex;gap:10px;align-items:center}
-.b{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid #25324a;border-radius:10px;background:var(--panel)}
-.b .ico{opacity:.9}
-.ham{width:38px;height:38px;border-radius:10px;border:1px solid #25324a;background:var(--panel);color:var(--txt);font-size:20px}
-.wrap{max-width:980px;margin:0 auto;padding:14px}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:radial-gradient(1200px 700px at 50% -200px,#0f1c2f,#070b12 60%);color:var(--txt);font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
 
-.stage{position:relative;aspect-ratio:16/9;max-width:980px;margin:12px auto;border:1px solid #1b2740;border-radius:14px;overflow:hidden;background:linear-gradient(#06121c,#0a1622 60%,#0b0f14)}
-.scene{position:absolute;inset:0;padding:16px}
-.speed{position:absolute;left:14px;top:14px;display:flex;gap:8px}
-.speed button{padding:6px 12px;border:1px solid #25324a;border-radius:10px;background:var(--panel);color:var(--txt)}
-.enemyCard,.allyCard{position:absolute;min-width:220px;border:1px solid #25324a;border-radius:12px;background:var(--panel);padding:10px}
-.enemyCard{right:16px;top:40px}
-.allyCard{left:16px;bottom:28px}
+/* ===== HUD ===== */
+.hud{
+  position:sticky;top:0;z-index:70;
+  display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;
+  padding:10px 12px;background:linear-gradient(180deg,#0c1421,#0a1120);
+  border-bottom:1px solid #17253c;box-shadow:0 8px 28px rgba(0,0,0,.35)
+}
+.brand{font-weight:900;letter-spacing:.6px;text-shadow:0 2px 12px rgba(0,0,0,.45)}
+.status{justify-self:center;display:flex;gap:12px;align-items:center}
+.b{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid #24324a;border-radius:12px;background:linear-gradient(180deg,#0f1828,#0b1423)}
+.b.gold{box-shadow:0 0 0 1px rgba(246,201,96,.15) inset}
+.b.gem{box-shadow:0 0 0 1px rgba(125,211,252,.18) inset}
+.b .ico{opacity:.95}
+.ham{width:40px;height:40px;border-radius:12px;border:1px solid #24324a;background:linear-gradient(180deg,#0f1828,#0b1423);color:#dfe7ff;font-size:20px}
+
+/* ===== STAGE ===== */
+.stage{position:relative;aspect-ratio:16/9;max-width:1100px;margin:14px auto;border:1px solid #16233a;border-radius:16px;overflow:hidden}
+.scene{position:absolute;inset:0;padding:16px;transition:background .35s ease}
+
+/* Biomes */
+.bg-forest{ background: radial-gradient(1200px 800px at 50% 0%,rgba(18,50,46,.45),transparent 55%), linear-gradient(180deg,#0b2b21,#07151a 65%,#070b12)}
+.bg-desert{ background: radial-gradient(1200px 800px at 50% 0%,rgba(60,48,12,.38),transparent 55%), linear-gradient(180deg,#2a220e,#0f1216 65%,#070b12)}
+.bg-volcano{background: radial-gradient(1200px 800px at 50% 0%,rgba(70,16,16,.42),transparent 55%), linear-gradient(180deg,#2a1212,#0f1216 65%,#070b12)}
+.bg-glacier{background: radial-gradient(1200px 800px at 50% 0%,rgba(12,50,80,.38),transparent 55%), linear-gradient(180deg,#12253a,#0e1420 65%,#070b12)}
+/* Rings + aura */
+.rings{position:absolute;inset:0;pointer-events:none}
+.ring{position:absolute;width:240px;height:78px;border-radius:50%;
+  background:radial-gradient(closest-side,rgba(190,220,255,.15),transparent 70%);
+  outline:1px solid rgba(120,160,200,.2);filter:blur(.3px)
+}
+.ring.ally{left:36px;bottom:36px}
+.ring.enemy{right:36px;top:86px;transform:scale(.95)}
+.aura{position:absolute;inset:auto;pointer-events:none;filter:blur(16px);opacity:.6}
+.aura.ally{left:36px;bottom:20px;width:220px;height:30px;background:radial-gradient(ellipse at 50% 50%, rgba(139,92,246,.55), transparent 70%)}
+.aura.enemy{right:36px;top:70px;width:200px;height:28px;background:radial-gradient(ellipse at 50% 50%, rgba(34,211,238,.55), transparent 70%)}
+
+/* Sprites + anims */
+.sprite{position:absolute;z-index:2;filter:drop-shadow(0 18px 28px rgba(0,0,0,.55))}
+.sprite.ally{left:70px;bottom:78px;font-size:88px;animation:float 2.8s ease-in-out infinite}
+.sprite.enemy{right:92px;top:64px;font-size:84px;animation:float 3.2s ease-in-out infinite reverse}
+@keyframes float{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}
+.hit{animation:hit .12s ease}
+@keyframes hit{0%{transform:translateX(0)}50%{transform:translateX(-3px)}100%{transform:translateX(0)}}
+
+/* Cards & HP bars */
+.box{position:absolute;right:16px;top:20px;min-width:240px;border:1px solid #24324a;border-radius:12px;background:linear-gradient(180deg,#0f1828,#0b1423);padding:10px}
+.box-ally{position:absolute;left:16px;bottom:16px;min-width:260px;border:1px solid #24324a;border-radius:12px;background:linear-gradient(180deg,#0f1828,#0b1423);padding:10px}
 .name{font-weight:800;margin-bottom:6px}
-.stat{opacity:.8;font-size:13px}
+.stat{opacity:.85;font-size:13px}
 .hpbar{height:10px;background:#0a1220;border:1px solid #20304d;border-radius:8px;overflow:hidden;margin-top:8px}
-.hpbar>i{display:block;height:100%;background:linear-gradient(90deg,#10b7d8,#22d3ee)}
+.hpbar>i{display:block;height:100%;background:linear-gradient(90deg,var(--hp1),var(--hp2))}
 
-.msg{margin:10px auto 0;border:1px dashed #25324a;border-radius:10px;background:var(--panel2);padding:10px;text-align:center;max-width:720px}
+/* Speed control bottom-right */
+.speed{
+  position:absolute;right:14px;bottom:14px;display:flex;gap:8px;align-items:center;
+  background:linear-gradient(180deg,#0f1828,#0b1423);border:1px solid #24324a;border-radius:12px;padding:8px 10px
+}
+.speed .label{font-size:12px;opacity:.85;margin-right:2px}
+.speed button{
+  min-width:42px;padding:6px 8px;border:1px solid #2a3a58;border-radius:10px;
+  background:#0f1828;color:#dfe7ff;font-weight:700;transition:transform .05s ease, box-shadow .15s ease
+}
+.speed button.active{box-shadow:0 0 0 2px rgba(139,92,246,.35) inset}
+.speed button:active{transform:translateY(1px)}
 
-/* Menu latéral */
-.menu{position:fixed;top:0;right:-320px;width:300px;height:100dvh;background:var(--panel);border-left:1px solid #23324c;padding:16px;display:flex;flex-direction:column;gap:8px;z-index:60;transition:right .18s ease}
+/* Log */
+.msg{position:absolute;left:50%;transform:translateX(-50%);bottom:60px;border:1px dashed #24324a;border-radius:10px;background:var(--panel2);padding:8px 12px;text-align:center;max-width:680px;opacity:.92}
+
+/* ===== MENU ===== */
+.menu{position:fixed;top:0;right:-320px;width:300px;height:100dvh;background:linear-gradient(180deg,#0e1728,#0b1423);border-left:1px solid #23324c;padding:16px;display:flex;flex-direction:column;gap:8px;z-index:90;transition:right .18s ease}
 .menu.open{right:0}
-.menu a{display:block;padding:12px;border:1px solid #25324a;border-radius:10px;background:var(--panel2);color:var(--txt);text-decoration:none}
+.menu a{display:block;padding:12px;border:1px solid #25324a;border-radius:12px;background:linear-gradient(180deg,#0f1828,#0b1423);color:var(--txt);text-decoration:none;box-shadow:0 6px 24px rgba(0,0,0,.22)}
+.menu a:hover{box-shadow:0 8px 30px rgba(0,0,0,.35)}
 
-/* Panneaux (sheets) */
-.sheet{position:fixed;inset:auto 0 0 0;max-height:70dvh;background:var(--panel);border-top:1px solid #23324c;border-radius:16px 16px 0 0;transform:translateY(110%);transition:transform .22s ease;z-index:55}
-.sheet.open{transform:translateY(0)}
-.sheet .inner{padding:14px;max-width:980px;margin:0 auto}
-.sheet h3{margin:6px 0 10px}
-.grid6{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
-.card{border:1px solid #25324a;background:var(--panel2);border-radius:10px;padding:8px;text-align:center}
-.r{font-size:11px;opacity:.8}
-.tag{display:inline-block;padding:3px 8px;border:1px solid #2a3a58;border-radius:8px;margin:4px 0;background:#0e1626}
-.btn{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid #2a3a58;border-radius:10px;background:#132039;color:var(--txt);text-decoration:none}
-.btn.gold .ico{color:var(--gold)} .btn.gem .ico{color:var(--gems)}
-.center{text-align:center}
-.small{font-size:12px;opacity:.8}
-.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+/* ===== PANELS fullscreen ===== */
+.panel{position:fixed;inset:0;background:radial-gradient(1200px 700px at 50% -200px,#0e1a2a,#0a0f17);display:none;z-index:80;overflow:auto}
+.panel.open{display:block}
+.inner{padding:16px;max-width:1100px;margin:0 auto}
+h3{margin:10px 0 12px}
+h4{margin:12px 0 8px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.grid6{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+.card{border:1px solid #25324a;background:linear-gradient(180deg,#101a24,#0e1626);border-radius:12px;padding:10px;text-align:center;box-shadow:0 10px 24px rgba(0,0,0,.25)}
 .input{padding:8px 10px;border:1px solid #2a3a58;border-radius:10px;background:#101a2e;color:var(--txt)}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border:1px solid #2a3a58;border-radius:12px;background:#132039;color:var(--txt);text-decoration:none;font-weight:700}
+.btn.gold .ico{color:var(--gold)} .btn.gem .ico{color:var(--gems)}
+.small{font-size:12px;opacity:.85}
+.tag{display:inline-flex;gap:6px;align-items:center;padding:4px 8px;border:1px solid #2a3a58;border-radius:999px;background:#0f172a}
 
-/* Raretés couleurs */
-.badgeRare{background:#20315a;border-color:#3757a6}
-.badgeEpic{background:#341b4e;border-color:#6f3bb8}
-.badgeLegend{background:#2f220c;border-color:#b8892a}
-.badgeSupreme{background:#152f2a;border-color:#33d1a5}
+/* Tiles Summon */
+.summon-hero{display:flex;align-items:center;gap:14px;margin:8px 0 16px}
+.summon-logo{font-size:46px;filter:drop-shadow(0 2px 8px rgba(0,0,0,.35))}
+.summon-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:8px}
+.tile{border:1px solid #2a3a58;border-radius:14px;background:linear-gradient(180deg,#101a24,#0e1626);padding:14px;display:flex;align-items:center;gap:12px;box-shadow:0 10px 22px rgba(0,0,0,.25)}
+.tile .big{font-size:34px}
+.tile .desc{font-size:12px;opacity:.85}
+.price{display:inline-flex;align-items:center;gap:6px;border:1px solid #2a3a58;border-radius:10px;padding:4px 8px;background:#132039}
+.price .ico{color:var(--gems)}
+/* Coffres colorés */
+.chests{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.chest{border:1px solid #2a3a58;border-radius:14px;padding:12px;text-align:center;background:linear-gradient(180deg,#101a24,#0e1626);box-shadow:0 10px 22px rgba(0,0,0,.25)}
+.chest .big{font-size:30px;margin-bottom:6px}
+.chest-basic{box-shadow:0 0 0 2px rgba(160,160,160,.18) inset}
+.chest-rare{box-shadow:0 0 0 2px rgba(96,165,250,.25) inset}
+.chest-supreme{box-shadow:0 0 0 2px rgba(245,158,11,.25) inset}
+.chest .price{margin-top:8px}
+.chest .price .ico{color:var(--gold)}
 
-/* Helpers inventaire */
-.slot{border:1px dashed #2a3a58;border-radius:10px;padding:8px;min-height:74px;display:grid;place-items:center}
+/* Raretés badges */
+.badgeRare{box-shadow:0 0 0 2px rgba(96,165,250,.25) inset}
+.badgeEpic{box-shadow:0 0 0 2px rgba(167,139,250,.25) inset}
+.badgeLegend{box-shadow:0 0 0 2px rgba(245,158,11,.25) inset}
+.badgeSupreme{box-shadow:0 0 0 2px rgba(20,184,166,.28) inset}
+
+/* Fancy transitions */
+.fadeIn{animation:fadeIn .2s ease}@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.pulse{animation:pulse 1.2s ease-in-out infinite}@keyframes pulse{0%,100%{opacity:.8}50%{opacity:1}}
+.spark{position:absolute;inset:auto;pointer-events:none;font-size:14px;opacity:.9;animation:rise .6s ease forwards}
+@keyframes rise{from{transform:translateY(0);opacity:1}to{transform:translateY(-16px);opacity:0}}
 </style>
 </head>
 <body>
-  <!-- HUD -->
-  <div class="hud">
-    <div class="brand">Dino Quest</div>
-    <div class="badge">
-      <div class="b"><span class="ico">Lvl</span> <span id="lvl">1</span></div>
-      <div class="b"><span class="ico">🪙</span> <span id="gold">0</span></div>
-      <div class="b"><span class="ico">💎</span> <span id="gems">0</span></div>
-      <button id="ham" class="ham" aria-label="menu" aria-expanded="false">☰</button>
+
+<!-- HUD -->
+<div class="hud">
+  <div class="brand">Dino Quest</div>
+  <div class="status">
+    <div class="b"><span class="ico">Lvl</span> <span id="lvl">1</span></div>
+    <div class="b gold"><span class="ico">🪙</span> <span id="gold">0</span></div>
+    <div class="b gem"><span class="ico">💎</span> <span id="gems">0</span></div>
+  </div>
+  <button id="ham" class="ham" aria-label="menu" aria-expanded="false">☰</button>
+</div>
+
+<!-- Menu -->
+<nav id="menu" class="menu">
+  <a href="#" data-panel="profile">Profil</a>
+  <a href="#" data-panel="improve">Améliorations</a>
+  <a href="#" data-panel="summon">Tirage & Coffres</a>
+  <a href="#" data-panel="bag">Inventaire</a>
+  <a href="#" data-panel="equip">Équipement</a>
+  <a href="#" data-panel="dex">Classeur</a>
+  <a href="#" data-panel="friends">Amis</a>
+  <a href="#" data-panel="rank">Classement</a>
+  <a href="#" data-panel="promo">Code Promo</a>
+  <a href="#" id="reset">Reset sauvegarde</a>
+</nav>
+
+<!-- STAGE -->
+<div class="stage">
+  <div id="scene" class="scene bg-forest">
+    <div class="rings"><div class="ring ally"></div><div class="ring enemy"></div></div>
+    <div class="aura ally"></div><div class="aura enemy"></div>
+
+    <div id="enemySprite" class="sprite enemy">🦂</div>
+    <div id="allySprite" class="sprite ally">🦕</div>
+
+    <div class="box">
+      <div class="name" id="enemyName">Niv. 1 — Lézard Sauvage</div>
+      <div class="hpbar"><i id="enemyHP" style="width:100%"></i></div>
+      <div class="stat" id="enemyStats">ATK 0 • DEF 0</div>
+    </div>
+    <div class="box-ally">
+      <div class="name" id="allyName">Petit Raptor — BASIC</div>
+      <div class="hpbar"><i id="allyHP" style="width:100%"></i></div>
+      <div class="stat" id="allyStats">PV 0 • ATK 0 • DEF 0 • VIT 0</div>
+    </div>
+
+    <!-- Speed control -->
+    <div class="speed">
+      <div class="label">Vitesse d’attaque</div>
+      <button data-sp="1" class="active">x1</button>
+      <button data-sp="2">x2</button>
+      <button data-sp="3">x3</button>
+    </div>
+
+    <div class="msg" id="msg">Combat auto — Boss tous les 10 niveaux : +10 💎</div>
+  </div>
+</div>
+
+<!-- PANELS -->
+<div id="panel-profile" class="panel"><div class="inner">
+  <h3>Profil</h3>
+  <div class="row" style="margin-bottom:12px">
+    <label>Pseudo :</label>
+    <input id="profileName" class="input" style="min-width:220px" placeholder="Ton pseudo">
+    <button class="btn" id="saveProfile">Sauvegarder</button>
+  </div>
+  <div class="grid6" id="profileStats"></div>
+  <h4>Équipe actuelle</h4>
+  <div class="grid6" id="profileTeam"></div>
+  <p class="small" id="profileId"></p>
+</div></div>
+
+<div id="panel-improve" class="panel"><div class="inner">
+  <h3>Améliorations</h3>
+  <div class="row" style="margin-bottom:8px">
+    <button class="btn gold" data-up="hp"><span class="ico">🪙</span> +20 PV (500)</button>
+    <button class="btn gold" data-up="atk"><span class="ico">🪙</span> +2 ATK (500)</button>
+    <button class="btn gold" data-up="def"><span class="ico">🪙</span> +1 DEF (500)</button>
+  </div>
+  <h4>Ton équipe</h4>
+  <div id="improveTeam" class="row"></div>
+</div></div>
+
+<div id="panel-summon" class="panel"><div class="inner">
+  <h3>Tirage & Coffres</h3>
+  <div class="summon-hero">
+    <div class="summon-logo">🦖</div>
+    <div>
+      <div class="name">Obtiens des dinosaures</div>
+      <div class="small">Tirage unique ou pack de 10 — toutes raretés.</div>
     </div>
   </div>
-
-  <!-- Menu -->
-  <nav id="menu" class="menu">
-    <a href="#" data-tab="improve">Améliorations</a>
-    <a href="#" data-tab="summon">Tirage</a>
-    <a href="#" data-tab="bag">Inventaire</a>
-    <a href="#" data-tab="dex">Classeur</a>
-    <a href="#" data-tab="equip">Équipement</a>
-    <a href="#" data-tab="promo">Code Promo</a>
-    <a href="#" data-tab="profile">Profil</a>
-    <a href="#" data-tab="friends">Amis</a>
-    <a href="#" data-tab="rank">Classement</a>
-    <a href="#" id="reset">Reset sauvegarde</a>
-  </nav>
-
-  <!-- Scène de combat -->
-  <div class="stage">
-    <div class="scene">
-      <div class="speed">
-        <button data-sp="1">x1</button>
-        <button data-sp="2">x2</button>
-        <button data-sp="3">x3</button>
+  <div class="summon-actions">
+    <button class="tile" id="btn-pull1">
+      <div class="big">🎴</div>
+      <div>
+        <div class="name">Tirage unique</div>
+        <div class="desc">Un seul dino</div>
+        <div class="price"><span class="ico">💎</span>100</div>
       </div>
-      <div class="enemyCard" id="enemyBox">
-        <div class="name" id="enemyName">Niv. 1 — Lézard Sauvage</div>
-        <div class="hpbar"><i id="enemyHP" style="width:100%"></i></div>
-        <div class="stat"><span id="enemyStats">ATK 0  DEF 0</span></div>
+    </button>
+    <button class="tile" id="btn-pull10">
+      <div class="big">🎴🎴</div>
+      <div>
+        <div class="name">Tirage x10</div>
+        <div class="desc">Dix d’un coup</div>
+        <div class="price"><span class="ico">💎</span>1000</div>
       </div>
-      <div class="allyCard" id="allyBox">
-        <div style="font-size:40px" id="allyEmoji">🦕</div>
-        <div class="name" id="allyName">Petit Raptor — BASIC</div>
-        <div class="hpbar"><i id="allyHP" style="width:100%"></i></div>
-        <div class="stat"><span id="allyStats">PV 120  • ATK 8 • DEF 2 • VIT 1.2s</span></div>
-      </div>
-      <div class="msg" id="msg">Combat auto — boss tous les 10 niveaux (+10 gemmes)</div>
-    </div>
+    </button>
   </div>
 
-  <!-- SHEETS -->
-  <!-- Améliorations -->
-  <div id="sheet-improve" class="sheet"><div class="inner">
-    <h3>Améliorations</h3>
-    <div class="row">
-      <button class="btn gold" data-up="hp"><span class="ico">🪙</span> +20 PV (500)</button>
-      <button class="btn gold" data-up="atk"><span class="ico">🪙</span> +2 ATK (500)</button>
-      <button class="btn gold" data-up="def"><span class="ico">🪙</span> +1 DEF (500)</button>
-    </div>
-  </div></div>
+  <h4>Coffres d’équipement (Or)</h4>
+  <div class="chests">
+    <button class="chest chest-basic" id="chest-basic">
+      <div class="big">🧰</div><div class="name">Coffre Basic</div>
+      <div class="small">Équipement commun</div>
+      <div class="price"><span class="ico">🪙</span>1 000</div>
+    </button>
+    <button class="chest chest-rare" id="chest-rare">
+      <div class="big">🧰</div><div class="name">Coffre Rare</div>
+      <div class="small">Équipement amélioré</div>
+      <div class="price"><span class="ico">🪙</span>5 000</div>
+    </button>
+    <button class="chest chest-supreme" id="chest-supreme">
+      <div class="big">🧰</div><div class="name">Coffre Suprême</div>
+      <div class="small">Équipement puissant</div>
+      <div class="price"><span class="ico">🪙</span>15 000</div>
+    </button>
+  </div>
 
-  <!-- Tirage -->
-  <div id="sheet-summon" class="sheet"><div class="inner">
-    <h3>Tirage</h3>
-    <div class="row">
-      <button class="btn gem" id="pull1"><span class="ico">💎</span> Tirage x1 (100)</button>
-      <button class="btn gem" id="pull10"><span class="ico">💎</span> Tirage x10 (1000)</button>
-    </div>
-    <h4 style="margin:12px 0 6px">Coffres (Or)</h4>
-    <div class="row">
-      <button class="btn gold" data-chest="basic"><span class="ico">🪙</span> Basic (1 000)</button>
-      <button class="btn gold" data-chest="rare"><span class="ico">🪙</span> Rare (5 000)</button>
-      <button class="btn gold" data-chest="supreme"><span class="ico">🪙</span> Suprême (15 000)</button>
-    </div>
-    <div id="summonResult" class="row" style="margin-top:12px"></div>
-  </div></div>
+  <div id="summonResult" class="row" style="margin-top:12px"></div>
+</div></div>
 
-  <!-- Inventaire -->
-  <div id="sheet-bag" class="sheet"><div class="inner">
-    <h3>Inventaire (6 par ligne)</h3>
-    <div id="bag" class="grid6"></div>
-  </div></div>
+<div id="panel-bag" class="panel"><div class="inner">
+  <h3>Inventaire (Consommables)</h3>
+  <div id="bag" class="grid6"></div>
+</div></div>
 
-  <!-- Classeur -->
-  <div id="sheet-dex" class="sheet"><div class="inner">
-    <h3>Classeur</h3>
-    <div id="dex" class="grid6"></div>
-  </div></div>
+<div id="panel-equip" class="panel"><div class="inner">
+  <h3>Équipement</h3>
+  <div id="equipTeam" class="row" style="margin-bottom:10px"></div>
+  <div class="grid6">
+    <div class="card"><div class="name">Arme</div><div id="slot-weapon">vide</div></div>
+    <div class="card"><div class="name">Armure</div><div id="slot-armor">vide</div></div>
+    <div class="card"><div class="name">Amulette</div><div id="slot-amulet">vide</div></div>
+  </div>
+</div></div>
 
-  <!-- Équipement -->
-  <div id="sheet-equip" class="sheet"><div class="inner">
-    <h3>Équipement — sélectionner un dinosaure</h3>
-    <div id="equipTeam" class="row" style="margin-bottom:10px"></div>
-    <div class="grid6">
-      <div>
-        <div class="tag">Arme</div>
-        <div id="slot-weapon" class="slot">vide</div>
-      </div>
-      <div>
-        <div class="tag">Armure</div>
-        <div id="slot-armor" class="slot">vide</div>
-      </div>
-      <div>
-        <div class="tag">Amulette</div>
-        <div id="slot-amulet" class="slot">vide</div>
-      </div>
-    </div>
-  </div></div>
+<div id="panel-dex" class="panel"><div class="inner">
+  <h3>Classeur</h3>
+  <div id="dex" class="grid6"></div>
+</div></div>
 
-  <!-- Code promo -->
-  <div id="sheet-promo" class="sheet"><div class="inner">
-    <h3>Code Promo</h3>
-    <div class="row">
-      <input id="promoInput" class="input" placeholder="Entrez un code…">
-      <button class="btn" id="applyPromo">Valider</button>
-    </div>
-    <p class="small">Astuce: <b>TESTDINO</b> → 200 000 or + 50 000 gemmes</p>
-  </div></div>
+<div id="panel-friends" class="panel"><div class="inner">
+  <h3>Amis</h3>
+  <div class="row" style="margin-bottom:12px">
+    <input id="friendId" class="input" placeholder="ID ami (ex: DQ-AB12-CD34)">
+    <button class="btn" id="addFriendBtn">Ajouter</button>
+  </div>
+  <div id="friendsList" class="grid6"></div>
+</div></div>
 
-  <!-- Profil -->
-  <div id="sheet-profile" class="sheet"><div class="inner">
-    <h3>Profil</h3>
-    <div class="row" style="margin:8px 0 14px">
-      <label>Pseudo :</label>
-      <input id="profileName" class="input" style="min-width:220px" placeholder="Ton pseudo">
-      <button class="btn" id="saveProfile">Sauvegarder</button>
-    </div>
-    <div class="grid6" id="profileStats"></div>
-    <h4 style="margin:16px 0 8px">Équipe actuelle</h4>
-    <div class="grid6" id="profileTeam"></div>
-    <p class="small" id="profileId"></p>
-  </div></div>
+<div id="panel-rank" class="panel"><div class="inner">
+  <h3>Classement (local)</h3>
+  <p class="small">Démo locale. On branchera le vrai serveur plus tard.</p>
+  <div id="rankList" class="grid6"></div>
+</div></div>
 
-  <!-- Amis -->
-  <div id="sheet-friends" class="sheet"><div class="inner">
-    <h3>Amis</h3>
-    <div class="row" style="margin:8px 0 14px">
-      <input id="friendId" class="input" placeholder="ID ami à ajouter (ex: DQ-AB12-CD34)">
-      <button class="btn" id="addFriendBtn">Ajouter</button>
-    </div>
-    <div id="friendsList" class="grid6"></div>
-  </div></div>
-
-  <!-- Classement -->
-  <div id="sheet-rank" class="sheet"><div class="inner">
-    <h3>Classement (local)</h3>
-    <p class="small">Version locale pour test. Prêt à brancher en ligne plus tard.</p>
-    <div id="rankList" class="grid6"></div>
-  </div></div>
+<div id="panel-promo" class="panel"><div class="inner">
+  <h3>Code Promo</h3>
+  <div class="row">
+    <input id="promoInput" class="input" placeholder="Entrez un code…">
+    <button class="btn" id="applyPromo">Valider</button>
+  </div>
+  <p class="small">Utilise <b>TESTDINO</b> pour recevoir 200 000 or et 50 000 gemmes.</p>
+</div></div>
 
 <script>
-/* ======= ÉTAT ======= */
+/* ====== SAVE & STATE ====== */
 const S = JSON.parse(localStorage.getItem("dq_save")||"{}");
 S.lvl ??= 1; S.gold ??= 0; S.gems ??= 0; S.speed ??= 1;
-S.collection ??= [];           // tous les dinos obtenus
-S.team ??= [];                 // équipe active (max 5)
-S.inv ??= [];                  // inventaire items
+S.collection ??= []; S.team ??= []; S.inv ??= []; // inv = consommables
 S.equip ??= { weapon:null, armor:null, amulet:null };
 S.player ??= { id:null, name:"", stats:{kills:0,goldEarned:0,gemsEarned:0}, friends:[] };
 if(!S.player.id) S.player.id = makeId();
-
 function save(){ localStorage.setItem("dq_save", JSON.stringify(S)); }
 
-/* ======= DATA ======= */
-const RAR = ["BASIC","RARE","EPIC","LEGEND","SUPREME"];
+/* ====== DATA ====== */
 const POOL = [
-  { key:"raptor", name:"Petit Raptor", emoji:"🦕", rarity:"BASIC",  hp:120, atk:8, def:2, spd:1.2 },
-  { key:"trike",  name:"Tricera",     emoji:"🦖", rarity:"RARE",   hp:180, atk:10, def:4, spd:1.2 },
-  { key:"stego",  name:"Stego",       emoji:"🦕", rarity:"EPIC",   hp:220, atk:12, def:6, spd:1.1 },
-  { key:"rex",    name:"T-Rex",       emoji:"🦖", rarity:"LEGEND", hp:260, atk:18, def:6, spd:1.0 },
-  { key:"aero",   name:"Aéro",        emoji:"🦕", rarity:"SUPREME",hp:300, atk:24, def:8, spd:0.9 },
+  { key:"b_raptor", name:"Petit Raptor", emoji:"🦕", rarity:"BASIC",  hp:120, atk:8,  def:2,  spd:1.2 },
+  { key:"r_raptor", name:"Raptor Agile", emoji:"🦖", rarity:"RARE",   hp:170, atk:12, def:4,  spd:1.1 },
+  { key:"e_trike",  name:"Tricéracorps", emoji:"🦕", rarity:"EPIC",   hp:220, atk:16, def:7,  spd:1.1 },
+  { key:"l_rex",    name:"T-Rex Alpha",  emoji:"🦖", rarity:"LEGEND", hp:280, atk:22, def:9,  spd:1.0 },
+  { key:"s_drake",  name:"Dragon Ancien",emoji:"🐲", rarity:"SUPREME",hp:340, atk:28, def:12, spd:0.9 },
 ];
-
 const CHESTS = {
-  basic : {cost:1000,  table:[{t:"weapon",n:"Griffe ébréchée",atk:2,r:"BASIC"},{t:"armor",n:"Peau tanné",def:1,r:"BASIC"},{t:"amulet",n:"Perle terne",hp:10,r:"BASIC"}]},
-  rare  : {cost:5000,  table:[{t:"weapon",n:"Dard poli",atk:4,r:"RARE"},{t:"armor",n:"Cuir épais",def:2,r:"RARE"},{t:"amulet",n:"Perle azure",hp:25,r:"RARE"}]},
-  supreme:{cost:15000, table:[{t:"weapon",n:"Crocs royaux",atk:8,r:"LEGEND"},{t:"armor",n:"Écaille drake",def:4,r:"LEGEND"},{t:"amulet",n:"Cœur ancien",hp:50,r:"LEGEND"}]}
+  basic : {cost:1000,  table:[{t:"weapon",n:"Griffe ébréchée",atk:2,r:"BASIC"},{t:"armor",n:"Peau tanné",def:1,r:"BASIC"},{t:"amulet",n:"Perle terne",hp:15,r:"BASIC"}]},
+  rare  : {cost:5000,  table:[{t:"weapon",n:"Dard poli",atk:4,r:"RARE"},{t:"armor",n:"Cuir épais",def:3,r:"RARE"},{t:"amulet",n:"Perle azur",hp:35,r:"RARE"}]},
+  supreme:{cost:15000, table:[{t:"weapon",n:"Crocs royaux",atk:8,r:"LEGEND"},{t:"armor",n:"Écaille drake",def:5,r:"LEGEND"},{t:"amulet",n:"Cœur ancien",hp:70,r:"LEGEND"}]}
 };
-
-function cloneD(d){ return JSON.parse(JSON.stringify(d)); }
+function clone(x){ return JSON.parse(JSON.stringify(x)); }
 function rollDino(){
-  // taux de drop (10 dinos définis au besoin) — simple pour démo
   const r = Math.random();
   let pool = POOL.filter(d=>d.rarity==="BASIC");
   if(r<0.02) pool = POOL.filter(d=>d.rarity==="SUPREME");
-  else if(r<0.08) pool = POOL.filter(d=>d.rarity==="LEGEND");
-  else if(r<0.22) pool = POOL.filter(d=>d.rarity==="EPIC");
+  else if(r<0.07) pool = POOL.filter(d=>d.rarity==="LEGEND");
+  else if(r<0.2) pool = POOL.filter(d=>d.rarity==="EPIC");
   else if(r<0.45) pool = POOL.filter(d=>d.rarity==="RARE");
-  return cloneD(pool[Math.floor(Math.random()*pool.length)]);
+  return clone(pool[Math.floor(Math.random()*pool.length)]);
 }
 
-/* ======= COMBAT ======= */
-let enemy=null, ally=null, ehp=1, ahp=1;
-function setWorld(lvl){
-  const base = 60 + (lvl-1)*10;
-  enemy = { name: (lvl%10===0?"Boss ":"")+"Niv. "+lvl+" — Lézard Sauvage", atk: 6+lvl, def: 2+Math.floor(lvl/3), hp: base+lvl*8, emoji:"🦎" };
-  ehp = enemy.hp; renderEnemy();
+/* ====== UI helpers ====== */
+const $=id=>document.getElementById(id); const txt=n=>Math.floor(n).toLocaleString('fr-FR');
+function msg(t){ const m=$("msg"); m.textContent=t; m.classList.add("fadeIn"); setTimeout(()=>m.classList.remove("fadeIn"),200); }
+function spark(x,y,txt,clr){ const s=document.createElement("div"); s.className="spark"; s.textContent=txt; s.style.left=x+"px"; s.style.top=y+"px"; s.style.color=clr; document.body.appendChild(s); setTimeout(()=>s.remove(),600); }
+
+/* ====== MENU & PANELS ====== */
+const ham=$("ham"), menu=$("menu");
+ham.addEventListener("click",(e)=>{e.stopPropagation(); menu.classList.toggle("open"); ham.setAttribute("aria-expanded", menu.classList.contains("open"));});
+menu.addEventListener("click",(e)=> e.stopPropagation());
+document.addEventListener("click",()=>{ if(menu.classList.contains("open")){ menu.classList.remove("open"); ham.setAttribute("aria-expanded","false"); }});
+function openPanel(name){ document.querySelectorAll(".panel").forEach(p=>p.classList.remove("open")); $("panel-"+name).classList.add("open"); }
+document.querySelectorAll('#menu a[data-panel]').forEach(a=>a.addEventListener('click',(e)=>{e.preventDefault(); menu.classList.remove("open"); openPanel(a.dataset.panel); if(a.dataset.panel==="summon") bindSummon(); if(a.dataset.panel==="dex") renderDex(); if(a.dataset.panel==="equip") renderEquip(); if(a.dataset.panel==="profile") renderProfile(); if(a.dataset.panel==="friends") renderFriends(); if(a.dataset.panel==="rank") renderRank(); if(a.dataset.panel==="improve") renderImproveTeam(); }));
+
+$("reset").onclick=()=>{ if(confirm("Effacer la sauvegarde ?")){ localStorage.removeItem("dq_save"); location.reload(); }};
+
+/* ====== COMBAT (cooldowns + biomes) ====== */
+let enemy=null, ally=null, ehp=1, ahp=1, allyCD=0, enemyCD=0, last=0;
+function biomeFor(lv){ const m=lv%40; if(m<10) return "forest"; if(m<20) return "desert"; if(m<30) return "volcano"; return "glacier"; }
+function setWorld(lv){
+  const sc=$("scene"); sc.classList.remove("bg-forest","bg-desert","bg-volcano","bg-glacier");
+  sc.classList.add("bg-"+biomeFor(lv));
+  const base=70+(lv-1)*12;
+  const boss= lv%10===0;
+  const mult = boss?1.6:1;
+  enemy={name:(boss?"BOSS — ":"Niv. "+lv+" — ")+"Lézard Sauvage", atk:Math.floor((6+lv)*mult), def:Math.floor((2+lv/3)*mult), hp:Math.floor((base+lv*10)*mult), emoji: boss?"🐉":"🦎"};
+  ehp = enemy.hp; enemyCD = 1.4;
+  $("enemyName").textContent=enemy.name; $("enemyStats").textContent=`ATK ${enemy.atk} • DEF ${enemy.def}`; $("enemySprite").textContent=enemy.emoji; $("enemyHP").style.width="100%";
 }
-function newEnemy(){ setWorld(S.lvl); }
 function useTeam(){
-  if(!S.team.length) S.team[0] = cloneD(POOL[0]);
+  if(!S.team.length){ S.team.push(clone(POOL[0])); }
   ally = S.team[0];
   ahp = ally.hp + (S.equip.amulet?.hp||0);
-  renderAlly();
+  allyCD = ally.spd || 1.2;
+  $("allyName").textContent=`${ally.name} — ${ally.rarity}`;
+  $("allyStats").textContent=`PV ${ally.hp+(S.equip.amulet?.hp||0)} • ATK ${ally.atk+(S.equip.weapon?.atk||0)} • DEF ${ally.def+(S.equip.armor?.def||0)} • VIT ${(ally.spd||1.2).toFixed(2)}s`;
+  $("allySprite").textContent=ally.emoji; $("allyHP").style.width="100%";
 }
+function renderHP(){ $("enemyHP").style.width = Math.max(0,ehp/enemy.hp*100)+"%"; $("allyHP").style.width = Math.max(0,ahp/(ally.hp+(S.equip.amulet?.hp||0))*100)+"%"; }
+function update(dt){
+  const mult=Number(S.speed)||1;
+  allyCD -= dt*mult; enemyCD -= dt*mult;
 
-function tick(dt){
-  const mult = S.speed;
-  // Ally attaque
-  if(Math.random() < dt/(ally.spd||1.2)*mult){
+  if(allyCD<=0){
     const dmg = Math.max(1,(ally.atk+(S.equip.weapon?.atk||0)) - enemy.def);
-    ehp -= dmg;
+    ehp -= dmg; allyCD += (ally.spd||1.2);
+    document.querySelector(".box").classList.add("hit"); setTimeout(()=>document.querySelector(".box").classList.remove("hit"),90);
+    spark(innerWidth-160,140,`-${dmg}`, "#9beafc");
   }
-  // Ennemi attaque
-  if(Math.random() < dt/1.4*mult){
+  if(enemyCD<=0){
     const dmg = Math.max(1,(enemy.atk) - (ally.def+(S.equip.armor?.def||0)));
-    ahp -= dmg;
+    ahp -= dmg; enemyCD += 1.4;
+    document.querySelector(".box-ally").classList.add("hit"); setTimeout(()=>document.querySelector(".box-ally").classList.remove("hit"),90);
+    spark(180, innerHeight-200, `-${dmg}`,"#ffb7b7");
   }
-  // checks
+
   if(ehp<=0){
-    S.player.stats.kills++; S.gold += 10+S.lvl*2; S.player.stats.goldEarned += 10+S.lvl*2;
-    S.lvl++;
-    if(S.lvl%10===0){ S.gems += 10; S.player.stats.gemsEarned += 10; msg("Boss vaincu ! +10 💎"); }
-    newEnemy(); useTeam(); save(); ui();
+    S.player.stats.kills++;
+    const g = 10+S.lvl*2; S.gold += g; S.player.stats.goldEarned += g;
+    S.lvl++; if(S.lvl%10===0){ S.gems += 10; S.player.stats.gemsEarned += 10; msg("Boss vaincu ! +10 💎"); }
+    save(); ui(); setWorld(S.lvl); useTeam();
   }else if(ahp<=0){
-    // défaite → recommence le même niveau
     msg("Défaite… on recommence le niveau !");
     useTeam(); save(); ui();
   }
   renderHP();
-  requestAnimationFrame(tick);
 }
+function loop(ts){ const dt=Math.min(0.05,(ts-last)/1000||0); last=ts; update(dt); requestAnimationFrame(loop); }
 
-/* ======= UI ======= */
-function byId(id){ return document.getElementById(id); }
-function ui(){
-  byId("lvl").textContent = S.lvl;
-  byId("gold").textContent = S.gold;
-  byId("gems").textContent = S.gems;
-}
-function renderEnemy(){
-  byId("enemyName").textContent = enemy.name;
-  byId("enemyStats").textContent = `ATK ${enemy.atk}  DEF ${enemy.def}`;
-  ehp = Math.max(1,ehp);
-  renderHP();
-}
-function renderAlly(){
-  byId("allyEmoji").textContent = ally.emoji||"🦕";
-  byId("allyName").textContent = `${ally.name} — ${ally.rarity}`;
-  byId("allyStats").textContent = `PV ${ally.hp+(S.equip.amulet?.hp||0)} • ATK ${ally.atk+(S.equip.weapon?.atk||0)} • DEF ${ally.def+(S.equip.armor?.def||0)} • VIT ${ally.spd||1.2}s`;
-  ahp = Math.max(1,ahp);
-  renderHP();
-}
-function renderHP(){
-  byId("enemyHP").style.width = Math.max(0,ehp/enemy.hp*100)+"%";
-  byId("allyHP").style.width  = Math.max(0,ahp/(ally.hp+(S.equip.amulet?.hp||0))*100)+"%";
-}
-function msg(t){ byId("msg").textContent = t; setTimeout(()=>byId("msg").textContent="Combat auto — boss tous les 10 niveaux (+10 gemmes)",2000); }
+/* ====== SPEED CONTROL ====== */
+document.querySelectorAll('.speed button').forEach(b=>{
+  b.onclick=()=>{ document.querySelectorAll('.speed button').forEach(x=>x.classList.remove('active')); b.classList.add('active'); S.speed = b.dataset.sp|0; save(); msg("Vitesse x"+S.speed); };
+});
 
-/* ======= INVENTAIRE/DEX/EQUIP ======= */
-function renderBag(){
-  const b = byId("bag");
-  if(!S.inv.length){ b.innerHTML = `<div class="small">Pas d'objets pour l'instant.</div>`; return; }
-  b.innerHTML = S.inv.map((it,i)=>`
-    <div class="card">
-      <div class="name">${it.n}</div>
-      <div class="r">${it.t.toUpperCase()} ${it.atk?`• ATK +${it.atk}`:''}${it.def?`• DEF +${it.def}`:''}${it.hp?`• PV +${it.hp}`:''}</div>
-      <button class="btn" data-equip="${i}">Équiper</button>
-    </div>
-  `).join('');
-  b.querySelectorAll("[data-equip]").forEach(btn=>{
-    btn.onclick = ()=> {
-      const it = S.inv[btn.dataset.equip|0];
-      S.equip[it.t] = it; // 1 par catégorie
-      msg(`Équipé : ${it.n}`);
-      save(); renderEquip();
-    };
-  });
-}
-function renderDex(){
-  const has = new Set(S.collection.map(d=>d.key));
-  byId("dex").innerHTML = POOL.map(d=>`
-    <div class="card ${d.rarity==='RARE'?'badgeRare':''} ${d.rarity==='EPIC'?'badgeEpic':''} ${d.rarity==='LEGEND'?'badgeLegend':''} ${d.rarity==='SUPREME'?'badgeSupreme':''}">
-      <div style="font-size:28px;opacity:${has.has(d.key)?1:.2}">${d.emoji}</div>
-      <div class="name">${d.name}</div>
-      <div class="r">${d.rarity}</div>
-    </div>`).join('');
-}
-function renderEquip(){
-  const t = byId("equipTeam");
-  t.innerHTML = S.team.slice(0,5).map((d,i)=>`
-    <button class="btn" data-team="${i}">${d.emoji} ${d.name}</button>
-  `).join('');
-  ["weapon","armor","amulet"].forEach(k=>{
-    const el = byId("slot-"+k);
-    const it = S.equip[k];
-    el.textContent = it ? `${it.n} ${it.atk?`•ATK+${it.atk}`:''}${it.def?`•DEF+${it.def}`:''}${it.hp?`•PV+${it.hp}`:''}` : "vide";
-  });
-}
-
-/* ======= TIRAGES/COFFRES ======= */
+/* ====== SUMMON / CHESTS ====== */
+function rarityColor(r){ if(r==='SUPREME') return 'linear-gradient(90deg,#14b8a6,#22d3ee)'; if(r==='LEGEND') return 'linear-gradient(90deg,#d4a03b,#f2c94c)'; if(r==='EPIC') return 'linear-gradient(90deg,#6f3bb8,#a78bfa)'; if(r==='RARE') return 'linear-gradient(90deg,#3757a6,#60a5fa)'; return '#0a1220'; }
+function showSummonResult(list){ const box=$('summonResult'); box.innerHTML = list.map(d=>`<div class="tag"><span style="display:inline-block;width:12px;height:12px;border-radius:6px;background:${rarityColor(d.rarity)}"></span> ${d.emoji} ${d.name} — ${d.rarity}</div>`).join(''); }
 function pull(n){
-  const cost = n===1?100:1000;
-  if(S.gems<cost) return msg("Pas assez de gemmes");
-  S.gems -= cost; S.player.stats.gemsEarned += 0; // déjà comptées à l'obtention
-  const got = [];
-  for(let i=0;i<n;i++){
-    const d = rollDino();
-    got.push(d);
-    S.collection.push(d);
-    if(S.team.length<5) S.team.push(cloneD(d));
-  }
-  save(); ui(); renderDex(); useTeam();
-  byId("summonResult").innerHTML = got.map(d=>`<div class="tag">${d.emoji} ${d.name} — ${d.rarity}</div>`).join('');
+  const cost = n===1?100:1000; if(S.gems<cost) return msg("Pas assez de gemmes");
+  S.gems -= cost; const got=[]; for(let i=0;i<n;i++){ const d=rollDino(); got.push(d); S.collection.push(d); if(S.team.length<5) S.team.push(clone(d)); }
+  save(); ui(); renderDex(); useTeam(); showSummonResult(got);
 }
 function openChest(kind){
-  const c = CHESTS[kind]; if(!c) return;
-  if(S.gold<c.cost) return msg("Pas assez d'or");
-  S.gold-=c.cost;
-  const it = cloneD(c.table[Math.floor(Math.random()*c.table.length)]);
-  S.inv.push(it);
-  save(); ui(); renderBag();
-  msg(`Objet obtenu : ${it.n}`);
+  const c = CHESTS[kind]; if(!c) return; if(S.gold<c.cost) return msg("Pas assez d'or");
+  S.gold -= c.cost; const it=clone(c.table[Math.floor(Math.random()*c.table.length)]);
+  // Les équipements ne sont pas dans l'inventaire (consommables), on les met directement équipables :
+  // On les stocke dans S.equipCandidates pour plus tard si tu veux les lister; pour la démo on notifie juste.
+  (S.equipCandidates??=[]).push(it);
+  save(); ui(); msg(`Objet obtenu : ${it.n}`);
+}
+function bindSummon(){
+  $('btn-pull1').onclick=()=>pull(1);
+  $('btn-pull10').onclick=()=>pull(10);
+  $('chest-basic').onclick = ()=>openChest('basic');
+  $('chest-rare').onclick = ()=>openChest('rare');
+  $('chest-supreme').onclick = ()=>openChest('supreme');
 }
 
-/* ======= AMÉLIORATIONS ======= */
-function improve(stat){
-  if(S.gold<500) return msg("Pas assez d'or");
-  S.gold-=500;
-  if(stat==="hp") S.team[0].hp += 20;
-  if(stat==="atk") S.team[0].atk += 2;
-  if(stat==="def") S.team[0].def += 1;
-  save(); ui(); renderAlly(); msg("Amélioration appliquée !");
+/* ====== INVENTAIRE (consommables) ====== */
+function renderBag(){
+  const list = (S.inv||[]).filter(it=>typeof it.use==='function');
+  const b=$("bag");
+  if(!list.length){ b.innerHTML=`<div class="small">Aucun consommable pour l’instant.</div>`; return; }
+  b.innerHTML = list.map((it,i)=>`
+    <div class="card">
+      <div class="name">${it.n}</div>
+      <div class="small">${it.desc||'Consommable'}</div>
+      <button class="btn" data-use="${i}">Utiliser</button>
+    </div>`).join('');
+  b.querySelectorAll("[data-use]").forEach(btn=>{
+    btn.onclick=()=>{ const it=list[btn.dataset.use|0]; it.use(S); const idx=S.inv.indexOf(it); if(idx>-1) S.inv.splice(idx,1); save(); ui(); renderBag(); };
+  });
 }
 
-/* ======= PROFIL/AMIS/CLASSEMENT (LOCAL) ======= */
+/* ====== ÉQUIPEMENT ====== */
+function renderEquip(){
+  const t=$("equipTeam");
+  t.innerHTML = S.team.slice(0,5).map((d,i)=>`<button class="btn" data-team="${i}">${d.emoji} ${d.name}</button>`).join('');
+  ["weapon","armor","amulet"].forEach(k=>{ const slot=$("slot-"+k); const it=S.equip[k]; slot.textContent = it? `${it.n}${it.atk?` • ATK+${it.atk}`:''}${it.def?` • DEF+${it.def}`:''}${it.hp?` • PV+${it.hp}`:''}` : "vide"; });
+}
+
+/* ====== AMÉLIORATIONS ====== */
+function renderImproveTeam(){
+  const t=$("improveTeam");
+  t.innerHTML = S.team.slice(0,5).map(d=>`
+    <div class="card" style="min-width:150px">
+      <div style="font-size:28px">${d.emoji}</div>
+      <div class="name">${d.name}</div>
+      <div class="small">${d.rarity}</div>
+    </div>`).join('');
+}
+document.querySelectorAll("[data-up]").forEach(b=> b.onclick=()=>{ if(S.gold<500) return msg("Pas assez d'or"); S.gold-=500; if(b.dataset.up==="hp") S.team[0].hp+=20; if(b.dataset.up==="atk") S.team[0].atk+=2; if(b.dataset.up==="def") S.team[0].def+=1; save(); ui(); useTeam(); msg("Amélioration appliquée !"); });
+
+/* ====== DEX ====== */
+function renderDex(){
+  const has=new Set(S.collection.map(d=>d.key));
+  $("dex").innerHTML = POOL.map(d=>`
+    <div class="card ${d.rarity==='RARE'?'badgeRare':''} ${d.rarity==='EPIC'?'badgeEpic':''} ${d.rarity==='LEGEND'?'badgeLegend':''} ${d.rarity==='SUPREME'?'badgeSupreme':''}">
+      <div style="font-size:28px;opacity:${has.has(d.key)?1:.25}">${d.emoji}</div>
+      <div class="name">${d.name}</div>
+      <div class="small">${d.rarity}</div>
+    </div>`).join('');
+}
+
+/* ====== PROFIL / AMIS / CLASSEMENT (local) ====== */
 function makeId(){ const r=()=>Math.random().toString(36).slice(2,6).toUpperCase(); return `DQ-${r()}-${r()}`; }
-
+$("saveProfile").onclick=()=>{ S.player.name = ($("profileName").value||"Joueur").slice(0,20); save(); msg("Profil sauvegardé"); renderProfile(); };
 function renderProfile(){
-  byId("profileName").value = S.player.name||"";
-  byId("profileId").textContent = `ID: ${S.player.id}`;
-  byId("profileStats").innerHTML = [
+  $("profileName").value = S.player.name||"";
+  $("profileId").textContent = `ID: ${S.player.id}`;
+  $("profileStats").innerHTML = [
     {k:'kills', label:'Ennemis vaincus'},
     {k:'goldEarned', label:'Or gagné'},
     {k:'gemsEarned', label:'Gemmes gagnées'},
-  ].map(it=>`<div class="card"><div class="name">${it.label}</div><div class="r">${S.player.stats[it.k]||0}</div></div>`).join('');
-  byId("profileTeam").innerHTML = S.team.slice(0,5).map(d=>`
-    <div class="card"><div style="font-size:28px">${d.emoji}</div><div class="name">${d.name}</div><div class="r">${d.rarity}</div></div>
-  `).join('');
+  ].map(it=>`<div class="card"><div class="name">${it.label}</div><div class="tag">${S.player.stats[it.k]||0}</div></div>`).join('');
+  $("profileTeam").innerHTML = S.team.slice(0,5).map(d=>`<div class="card"><div style="font-size:28px">${d.emoji}</div><div class="name">${d.name}</div><div class="small">${d.rarity}</div></div>`).join('');
 }
-byId("saveProfile").onclick = ()=>{ S.player.name = (byId("profileName").value||"Joueur").slice(0,20); save(); msg("Profil sauvegardé"); renderProfile(); };
-
+$("addFriendBtn").onclick=()=>{ const v=$("friendId").value.trim(); if(!/^DQ-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(v)) return alert("ID invalide (ex: DQ-AB12-CD34)"); if(!S.player.friends.includes(v)) S.player.friends.push(v); $("friendId").value=""; save(); renderFriends(); };
 function renderFriends(){
-  const list = byId("friendsList");
-  const arr = S.player.friends||[];
-  list.innerHTML = (arr.length?arr:["Aucun ami"]).map(id=>`
+  const arr=S.player.friends||[]; $("friendsList").innerHTML = (arr.length?arr:["Aucun ami"]).map(id=>`
     <div class="card"><div class="name">${id}</div>
-      ${id!=="Aucun ami"?`<button class="btn" data-rm="${id}">Retirer</button>`:""}
-    </div>`).join('');
-  list.querySelectorAll("[data-rm]").forEach(b=>{
-    b.onclick = ()=>{ S.player.friends = (S.player.friends||[]).filter(x=>x!==b.dataset.rm); save(); renderFriends(); };
-  });
-};
-byId("addFriendBtn").onclick = ()=>{
-  const v = byId("friendId").value.trim();
-  if(!/^DQ-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(v)) return alert("ID invalide (ex: DQ-AB12-CD34)");
-  S.player.friends = S.player.friends||[];
-  if(!S.player.friends.includes(v)) S.player.friends.push(v);
-  save(); byId("friendId").value=""; renderFriends();
-};
-
-function score(){ return (S.player.stats.kills||0) + Math.floor((S.gold||0)/100) + Math.floor((S.gems||0)/50); }
+    ${id!=="Aucun ami"?`<button class="btn" data-rm="${id}">Retirer</button>`:""}</div>`).join('');
+  document.querySelectorAll("[data-rm]").forEach(b=> b.onclick=()=>{ S.player.friends=S.player.friends.filter(x=>x!==b.dataset.rm); save(); renderFriends(); });
+}
+function score(){ return (S.player.stats.kills||0)+Math.floor((S.gold||0)/100)+Math.floor((S.gems||0)/50); }
 function renderRank(){
-  const fake = [
-    {name:'Rex', id:'DQ-AAAA-BBBB', score:120},
-    {name:'Nyla', id:'DQ-CCCC-DDDD', score:95},
-    {name:'Zed', id:'DQ-EEEE-FFFF', score:80},
-  ];
-  const me = {name:S.player.name||"Moi", id:S.player.id, score:score()};
-  const all = [...fake,me].sort((a,b)=>b.score-a.score).slice(0,12);
-  byId("rankList").innerHTML = all.map(u=>`
+  const fake=[{name:'Rex',id:'DQ-AAAA-BBBB',score:120},{name:'Nyla',id:'DQ-CCCC-DDDD',score:95},{name:'Zed',id:'DQ-EEEE-FFFF',score:80}];
+  const me={name:S.player.name||"Moi", id:S.player.id, score:score()};
+  const all=[...fake,me].sort((a,b)=>b.score-a.score).slice(0,12);
+  $("rankList").innerHTML = all.map(u=>`
     <div class="card" style="${u.id===S.player.id?'outline:2px solid #22d3ee':''}">
-      <div class="name">${u.name}</div>
-      <div class="r">${u.id}</div>
-      <div class="tag">Score: ${u.score}</div>
+      <div class="name">${u.name}</div><div class="small">${u.id}</div><div class="tag">Score: ${u.score}</div>
     </div>`).join('');
 }
 
-/* ======= PROMO ======= */
-byId("applyPromo").onclick = ()=>{
-  const c = (byId("promoInput").value||"").trim().toUpperCase();
-  if(c==="TESTDINO"){
-    S.gold += 200000; S.gems += 50000;
-    save(); ui(); msg("Bonus appliqué !");
-  }else msg("Code invalide");
-};
+/* ====== PROMO ====== */
+$("applyPromo").onclick=()=>{ const c=($("promoInput").value||"").trim().toUpperCase(); if(c==="TESTDINO"){ S.gold+=200000; S.gems+=50000; save(); ui(); msg("Bonus appliqué !"); } else msg("Code invalide"); };
 
-/* ======= MENU & SHEETS ======= */
-const ham = byId("ham"), menu = byId("menu");
-ham.addEventListener("click",(e)=>{ e.stopPropagation(); menu.classList.toggle("open"); ham.setAttribute("aria-expanded", menu.classList.contains("open")); });
-menu.addEventListener("click",(e)=> e.stopPropagation());
-document.addEventListener("click",()=>{ if(menu.classList.contains("open")){ menu.classList.remove("open"); ham.setAttribute("aria-expanded","false"); }});
-
-function openSheet(name){ byId("sheet-"+name).classList.add("open"); }
-function closeAllSheets(){ document.querySelectorAll(".sheet").forEach(s=>s.classList.remove("open")); }
-document.querySelectorAll('#menu a[data-tab]').forEach(a=>{
-  a.addEventListener('click',(e)=>{
-    e.preventDefault(); closeAllSheets();
-    const t = a.dataset.tab;
-    if(t==='improve') openSheet('improve');
-    else if(t==='summon'){ renderBag(); openSheet('summon'); }
-    else if(t==='bag'){ renderBag(); openSheet('bag'); }
-    else if(t==='dex'){ renderDex(); openSheet('dex'); }
-    else if(t==='equip'){ renderEquip(); openSheet('equip'); }
-    else if(t==='promo'){ openSheet('promo'); }
-    else if(t==='profile'){ renderProfile(); openSheet('profile'); }
-    else if(t==='friends'){ renderFriends(); openSheet('friends'); }
-    else if(t==='rank'){ renderRank(); openSheet('rank'); }
-  });
-});
-byId("reset").onclick = ()=>{ if(confirm("Effacer la sauvegarde ?")){ localStorage.removeItem("dq_save"); location.reload(); }};
-
-/* ======= HOOKS UI ======= */
-document.querySelectorAll(".speed button").forEach(b=> b.onclick=()=>{ S.speed = b.dataset.sp|0; save(); msg("Vitesse x"+S.speed); });
-document.querySelectorAll("[data-up]").forEach(b=> b.onclick=()=> improve(b.dataset.up));
-byId("pull1").onclick = ()=> pull(1);
-byId("pull10").onclick = ()=> pull(10);
-document.querySelectorAll("[data-chest]").forEach(b=> b.onclick=()=> openChest(b.dataset.chest));
-
-/* ======= INIT ======= */
-function firstStart(){
-  if(!S.collection.length){ S.collection.push(cloneD(POOL[0])); }
-  if(!S.team.length){ S.team.push(cloneD(POOL[0])); }
-}
-firstStart(); ui(); setWorld(S.lvl); useTeam(); renderDex(); renderBag();
-let last=performance.now(); requestAnimationFrame(function loop(t){ const dt=(t-last)/1000; last=t; tick(dt); });
+/* ====== INIT ====== */
+function ui(){ $("lvl").textContent=S.lvl; $("gold").textContent=txt(S.gold); $("gems").textContent=txt(S.gems); }
+function firstStart(){ if(!S.collection.length){ S.collection.push(clone(POOL[0])); } if(!S.team.length){ S.team.push(clone(POOL[0])); } }
+firstStart(); ui(); setWorld(S.lvl); useTeam(); renderDex(); renderBag(); renderProfile(); renderFriends();
+requestAnimationFrame((t)=>{last=t; loop(t);});
 </script>
 </body>
 </html>
