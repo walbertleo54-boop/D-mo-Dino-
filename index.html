@@ -1,156 +1,145 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Dino Quest</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dino Quest — Deluxe</title>
 <style>
 :root{
-  --bg:#0b0f14; --bg2:#0f1622; --panel:#101826; --panel2:#0d1320;
-  --ring:#0fa3ff; --hp:#24d3ee; --gold:#cdd6f4; --gem:#7dd3fc;
-  --ok:#86efac; --warn:#fde68a; --bad:#fca5a5;
-  --text:#e6edf6; --muted:#9fb0c3; --border:#1e293b;
-  --shadow:0 8px 30px rgba(0,0,0,.35);
+  --bg:#090e16;--bg2:#0c1320;--panel:#0f172a;--panel2:#0b1322;--border:#1f2a44;
+  --txt:#e6eefc;--muted:#a9bbd6;--gold:#ffd37a;--gems:#7dd3fc;--hp:#28d0ff;
+  --rare:#38bdf8;--epic:#a78bfa;--leg:#f59e0b;--sup:#22d3b6;--shadow:0 10px 30px #0008;
 }
-/* Reset + base */
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0;color:var(--text);font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-  background: radial-gradient(90vmax 60vmax at 30% -10%, #0f2a44 0%, transparent 55%),
-              radial-gradient(80vmax 60vmax at 100% 0%, #10243a 0%, transparent 50%),
-              linear-gradient(180deg,var(--bg2),var(--bg));
-  overflow:hidden;
-}
-/* HUD top */
-.top{
-  position:fixed; inset:0 0 auto 0; height:58px; display:flex; align-items:center; justify-content:space-between;
-  padding:0 12px; background:linear-gradient(180deg,rgba(16,24,38,.85),rgba(16,24,38,.35) 70%, transparent);
-  border-bottom:1px solid var(--border); z-index:40;
-}
-.brand{font-weight:800; letter-spacing:.5px}
-.hud{display:flex; gap:8px; align-items:center; font-weight:700}
-.badge{display:flex; gap:6px; align-items:center; padding:6px 10px;
-  border:1px solid var(--border); border-radius:12px; background:var(--panel); box-shadow:var(--shadow); }
-.g{color:var(--gold)} .j{color:var(--gem)}
-.ham{width:34px;height:34px;border-radius:10px;border:1px solid var(--border);background:var(--panel);display:grid;place-items:center}
-.ham span{width:16px;height:2px;background:#9fb0c3;position:relative;display:block}
-.ham span:before,.ham span:after{content:"";position:absolute;left:0;width:100%;height:2px;background:#9fb0c3}
-.ham span:before{top:-6px} .ham span:after{top:6px}
+*{box-sizing:border-box}html,body{height:100%}body{margin:0;background:
+ radial-gradient(90vmax 60vmax at 30% -10%, #143a64 0%, transparent 55%),
+ radial-gradient(70vmax 50vmax at 100% 0%, #0f2a4a 0%, transparent 55%),
+ linear-gradient(180deg,var(--bg2),var(--bg));color:var(--txt);font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
+button{cursor:pointer}
+a{color:inherit}
+.hud{position:fixed;inset:0 0 auto 0;height:58px;padding:0 12px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(180deg,#0e1628ee,#0b1322aa,transparent);border-bottom:1px solid var(--border);z-index:60}
+.brand{font-weight:900;letter-spacing:.6px}
+.badges{display:flex;gap:10px;align-items:center}
+.badge{display:flex;gap:6px;align-items:center;padding:6px 10px;border:1px solid var(--border);border-radius:12px;background:linear-gradient(180deg,#0f182b,#0b1423);box-shadow:var(--shadow);font-weight:800}
+.ham{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:linear-gradient(180deg,#0e182a,#0b1322);display:grid;place-items:center}
+.ham span{display:block;width:16px;height:2px;background:#cfe0ff;position:relative}
+.ham span:before,.ham span:after{content:"";position:absolute;left:0;width:100%;height:2px;background:#cfe0ff}
+.ham span:before{top:-6px}.ham span:after{top:6px}
 
-/* Stage */
-.stage{position:absolute; inset:58px 0 0 0; overflow:hidden}
-.scene{position:absolute; inset:16px 16px 16px 16px; border-radius:18px;
-  background: radial-gradient(80vmax 50vmax at 50% 20%, rgba(29,78,216,.18), transparent 60%),
-              radial-gradient(60vmax 40vmax at 50% 100%, rgba(14,165,233,.12), transparent 55%);
-  border:1px solid var(--border);
+/* quickbar */
+.quickbar{position:fixed;top:58px;left:0;right:0;z-index:55;display:flex;gap:10px;padding:10px 12px;overflow:auto;background:linear-gradient(180deg,rgba(13,19,32,.9),rgba(13,19,32,.55),transparent);border-bottom:1px solid var(--border)}
+.qbtn{flex:0 0 auto;display:flex;gap:10px;align-items:center;padding:10px 12px;border:1px solid var(--border);border-radius:14px;background:linear-gradient(180deg,#0f192b,#0b1423);box-shadow:var(--shadow);font-weight:800}
+.qbtn span{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:rgba(148,163,184,.12);font-size:18px}
+
+/* stage */
+.stage{position:absolute;inset:108px 0 0 0;overflow:hidden}
+.scene{position:absolute;inset:16px;overflow:hidden;border:1px solid var(--border);border-radius:18px;background:
+ radial-gradient(80vmax 50vmax at 50% 5%, rgba(56,189,248,.18), transparent 60%),
+ radial-gradient(60vmax 40vmax at 50% 100%, rgba(167,139,250,.12), transparent 55%);
 }
-.hint{position:absolute; top:18px; left:calc(50% - 260px); width:520px; max-width:calc(100% - 32px);
-  color:#b7e4c7; background:rgba(16,38,30,.6); border:1px dashed #2dd4bf; border-radius:12px; padding:12px;
-}
-.enemyCard{position:absolute; right:28px; top:110px; width:320px; border-radius:16px; background:linear-gradient(180deg,#0f1c2c,#0c1524);
-  padding:14px; border:1px solid var(--border); box-shadow:var(--shadow)
-}
-.cardTitle{font-weight:800; font-size:20px; margin-bottom:8px}
-.bar{height:10px;background:#0b1220;border-radius:8px;overflow:hidden;border:1px solid var(--border)}
-.bar>i{display:block;height:100%;background:var(--hp);width:100%}
-.stat{color:var(--muted); font-weight:700;letter-spacing:.3px;margin-top:8px}
+.hint{position:absolute;left:50%;transform:translateX(-50%);top:14px;padding:8px 12px;border:1px dashed #2dd4bf;border-radius:10px;background:#0a1f20cc;color:#bffbe9}
 
-.teamRow{position:absolute; left:22px; bottom:110px; right:22px; height:72px; display:flex; gap:12px; align-items:center}
-.teCard{flex:1; min-width:130px; max-width:240px; border-radius:16px; background:linear-gradient(180deg,#0e1928,#0b1422);
-  border:1px solid var(--border); padding:12px; position:relative}
-.teName{font-weight:800}
-.hpbar{height:8px;margin-top:6px;background:#0a1120;border-radius:8px;border:1px solid var(--border);overflow:hidden}
-.hpbar>i{display:block;height:100%;background:var(--hp);width:100%}
+.enemyCard{position:absolute;right:26px;top:110px;width:320px;padding:14px;border:1px solid var(--border);border-radius:16px;background:linear-gradient(180deg,#0f1c2c,#0c1524);box-shadow:var(--shadow)}
+.cardTitle{font-weight:900;font-size:20px;margin:0 0 8px}
+.bar{height:10px;background:#081226;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.bar>i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#28d0ff,#7dd3fc)}
+.stat{color:var(--muted);font-weight:800;margin-top:8px}
 
-/* Sprites */
-.sprite, .enemySprite{
-  position:absolute; font-size:64px; filter: drop-shadow(0 12px 20px rgba(0,0,0,.5));
-  animation: idle 2.4s ease-in-out infinite;
-}
-.sprite{left:60px; bottom:205px}
-.enemySprite{right:110px; bottom:260px}
-@keyframes idle{0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)}}
+.teamRow{position:absolute;left:22px;right:22px;bottom:110px;display:flex;gap:12px}
+.te{flex:1;border:1px solid var(--border);border-radius:16px;background:linear-gradient(180deg,#0e1928,#0b1422);padding:12px;min-width:140px;box-shadow:var(--shadow)}
+.teName{font-weight:900}
+.hpbar{height:8px;margin-top:6px;background:#081226;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.hpbar>i{display:block;height:100%;background:linear-gradient(90deg,#28d0ff,#7dd3fc);width:100%}
+.sprite,.enemySprite{position:absolute;font-size:64px;filter:drop-shadow(0 12px 20px #0007);animation:float 2.6s ease-in-out infinite}
+.sprite{left:64px;bottom:210px}.enemySprite{right:108px;bottom:260px}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 
-/* Vitesse */
-.speedBox{position:absolute; right:16px; bottom:20px; display:flex; gap:8px; align-items:center}
-.speedBox .chip{border:1px solid var(--border); background:var(--panel); border-radius:12px; padding:8px 12px; color:var(--muted)}
-.speedBox .btn{padding:8px 12px;border:1px solid var(--border);border-radius:12px;background:var(--panel);}
-.speedBox .btn.on{outline:2px solid #4f46e5}
+.speed{position:absolute;right:14px;bottom:18px;display:flex;gap:8px;align-items:center}
+.chip{padding:8px 12px;border:1px solid var(--border);border-radius:12px;background:linear-gradient(180deg,#0f192b,#0b1423);color:#cfe0ff}
+.btn{padding:8px 12px;border:1px solid var(--border);border-radius:12px;background:linear-gradient(180deg,#0f192b,#0b1423);color:var(--txt);font-weight:800}
+.btn.on{outline:2px solid #5b5bf6}
 
-/* Particules */
-.particle{position:absolute; pointer-events:none; font-size:18px; animation: pop .5s ease-out forwards}
-@keyframes pop{from{opacity:1; transform:translateY(0) scale(1)} to{opacity:0; transform:translateY(-18px) scale(1.2)}}
-
-/* Menu & Panels */
-.menu{position:fixed; top:56px; right:14px; width:240px; background:var(--panel); border:1px solid var(--border); border-radius:16px;
-  padding:8px; box-shadow:var(--shadow); display:none; z-index:50}
+/* menu */
+.menu{position:fixed;top:58px;right:14px;width:260px;display:none;background:linear-gradient(180deg,#0e1728,#0b1423);border:1px solid var(--border);border-radius:16px;padding:8px;box-shadow:var(--shadow);z-index:70}
 .menu.open{display:block}
-.menu a{display:block; padding:10px 12px; border-radius:10px; color:var(--text); text-decoration:none}
+.menu a{display:flex;gap:8px;align-items:center;padding:12px;border-radius:12px;text-decoration:none}
 .menu a:hover{background:rgba(148,163,184,.12)}
 
-.panel{
-  position:fixed; inset:0; display:none; z-index:60; background: radial-gradient(200vmax 120vmax at 50% -20%, rgba(59,130,246,.15), transparent 40%),
-                                                  linear-gradient(180deg, rgba(2,6,23,.9), rgba(2,6,23,.75));
-  backdrop-filter: blur(6px);
-}
+/* panels */
+.panel{position:fixed;inset:0;display:none;z-index:75;background:radial-gradient(200vmax 120vmax at 50% -20%, rgba(59,130,246,.15), transparent 40%),linear-gradient(180deg, rgba(2,6,23,.9), rgba(2,6,23,.75));backdrop-filter:blur(6px)}
 .panel.open{display:block}
-.panel .wrap{position:absolute; inset:70px 16px 16px 16px; border:1px solid var(--border); border-radius:16px; background:var(--panel2); padding:16px; overflow:auto}
-.panel h2{margin:0 0 12px 0}
-.pbar{height:8px;background:#0a1120;border-radius:8px;overflow:hidden;border:1px solid var(--border)}
-.pbar>i{display:block;height:100%;background:var(--hp);width:0}
-.grid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px}
-@media(min-width:560px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-@media(min-width:820px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
-.tile{border:1px solid var(--border); background:linear-gradient(180deg,#0d1626,#0b1322); padding:12px; border-radius:14px}
-.kv{display:flex; justify-content:space-between; color:var(--muted); font-weight:700}
-.row{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
-.btn,.sec{
-  display:inline-flex; gap:8px; align-items:center; padding:10px 14px; border-radius:12px; border:1px solid var(--border); background:var(--panel);
-  color:var(--text); text-decoration:none; font-weight:700;
-}
-.sec{background:transparent}
-.hr{height:1px;background:var(--border);margin:12px 0}
-.bad{color:var(--bad)} .ok{color:var(--ok)}
+.wrap{position:absolute;inset:82px 16px 16px 16px;border:1px solid var(--border);border-radius:16px;background:var(--panel2);padding:16px;overflow:auto}
+.back{position:absolute;left:16px;top:16px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media(min-width:680px){.grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:960px){.grid{grid-template-columns:repeat(4,1fr)}}
+.tile{border:1px solid var(--border);border-radius:14px;background:linear-gradient(180deg,#0e1828,#0b1322);padding:12px}
+.kv{display:flex;justify-content:space-between;align-items:center}
+.small{font-size:12px;color:var(--muted);font-weight:700}
 
-.back{position:absolute; left:14px; top:14px}
+/* rarity glow */
+.rBasic{box-shadow:0 0 0 1px #64748b inset,0 0 22px #64748b33}
+.rRare{box-shadow:0 0 0 1px var(--rare) inset,0 0 26px #38bdf859}
+.rEpic{box-shadow:0 0 0 1px var(--epic) inset,0 0 28px #a78bfa66}
+.rLeg{box-shadow:0 0 0 1px var(--leg) inset,0 0 30px #f59e0b66}
+.rSup{box-shadow:0 0 0 1px var(--sup) inset,0 0 32px #22d3b666}
 
-/* Toast */
-.toast{position:fixed; left:50%; bottom:18px; transform:translateX(-50%);
-  background:#111827dd; color:#e5e7eb; border:1px solid #374151; border-radius:12px; padding:10px 14px; z-index:90; display:none}
+/* overlay (tirage / coffre / pack) */
+.overlay{position:fixed;inset:0;background:rgba(2,6,23,.88);backdrop-filter:blur(8px);display:none;z-index:90}
+.overlay.show{display:block}
+.overWrap{position:absolute;inset:86px 16px 16px;display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.card{border:1px solid var(--border);border-radius:14px;background:linear-gradient(180deg,#0e1828,#0b1322);padding:12px;text-align:center;transform:scale(.9);opacity:0}
+.card .em{font-size:46px;margin:8px 0}
+.card .rn{font-weight:900}
+.pop{animation:popIn .34s ease-out forwards}
+@keyframes popIn{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+
+/* modal dino (améliorer / équiper) */
+.modal{position:fixed;inset:0;background:rgba(10,14,24,.85);backdrop-filter:blur(6px);display:none;z-index:95}
+.modal.show{display:block}
+.mwrap{position:absolute;inset:100px 16px 16px;border:1px solid var(--border);background:var(--panel);border-radius:16px;padding:16px;overflow:auto}
+.bigActions{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}
+.bigBtn{flex:1;min-width:180px;padding:12px 14px;border:1px solid var(--border);border-radius:14px;background:linear-gradient(180deg,#0f1a2c,#0b1423);font-weight:900;display:flex;gap:10px;align-items:center;justify-content:center}
+.slotRow{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.slot{border:1px dashed var(--border);border-radius:12px;padding:10px;min-height:70px;text-align:center}
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#111827dd;border:1px solid #374151;color:#e5e7eb;border-radius:12px;padding:10px 14px;z-index:120;display:none}
 .toast.show{display:block}
-
-/* Debug label (en bas à gauche) – tu peux enlever .debug pour masquer */
-.debug{position:fixed; left:10px; bottom:10px; background:#1f2937cc; border:1px solid #374151; padding:6px 10px; border-radius:10px; font-weight:700}
 </style>
 </head>
 <body>
 
 <!-- HUD -->
-<header class="top">
+<header class="hud">
   <div class="brand">Dino<br>Quest</div>
-  <div class="hud">
-    <div class="badge">Lvl&nbsp;<span id="lvl">1</span></div>
-    <div class="badge g">🪙&nbsp;<span id="gold">0</span></div>
-    <div class="badge j">💎&nbsp;<span id="gems">0</span></div>
-    <button id="ham" class="ham" aria-label="menu" aria-expanded="false"><span></span></button>
+  <div class="badges">
+    <div class="badge">Lvl <span id="lvl">1</span></div>
+    <div class="badge">🪙 <span id="gold">0</span></div>
+    <div class="badge">💎 <span id="gems">0</span></div>
+    <button id="ham" class="ham" aria-expanded="false"><span></span></button>
   </div>
 </header>
 
+<!-- Quick icons -->
+<div class="quickbar">
+  <button class="qbtn" data-tab="improve"><span>🛠️</span><b>Améliorations</b></button>
+  <button class="qbtn" data-tab="summon"><span>🎴</span><b>Tirage</b></button>
+  <button class="qbtn" data-tab="bag"><span>🎒</span><b>Inventaire</b></button>
+  <button class="qbtn" data-tab="dex"><span>📘</span><b>Classeur</b></button>
+  <button class="qbtn" data-tab="shop"><span>🛍️</span><b>Boutique</b></button>
+</div>
+
 <!-- Menu -->
 <nav id="menu" class="menu">
-  <a href="#" data-tab="improve">Améliorations</a>
-  <a href="#" data-tab="summon">Tirage</a>
-  <a href="#" data-tab="bag">Inventaire</a>
-  <a href="#" data-tab="dex">Classeur</a>
-  <a href="#" data-tab="shop">Boutique</a>
-  <a href="#" data-tab="promo">Code Promo</a>
+  <a href="#" data-tab="improve">🛠️ Améliorations</a>
+  <a href="#" data-tab="summon">🎴 Tirage</a>
+  <a href="#" data-tab="bag">🎒 Inventaire</a>
+  <a href="#" data-tab="dex">📘 Classeur</a>
+  <a href="#" data-tab="shop">🛍️ Boutique</a>
+  <a href="#" data-tab="promo">🎟️ Code promo</a>
 </nav>
 
-<!-- Stage combat -->
+<!-- Stage Combat -->
 <div class="stage">
   <div class="scene" id="scene">
-    <div class="hint" id="hint">Combat auto — Boss toutes les 15 zones (+10 💎)</div>
+    <div class="hint" id="msg">Combat auto — Boss toutes les 15 zones (+10💎)</div>
 
     <div class="enemyCard" id="enemyCard">
       <div class="cardTitle" id="enemyName">Niv. 1 — Lézard Sauvage</div>
@@ -158,16 +147,13 @@ body{
       <div class="stat" id="enemyStats">ATK 6 • DEF 2</div>
     </div>
 
-    <!-- sprites -->
     <div id="allySprite" class="sprite">🦕</div>
     <div id="enemySprite" class="enemySprite">🦎</div>
 
-    <!-- barre équipe -->
-    <div class="teamRow" id="teamRow"></div>
+    <div id="teamRow" class="teamRow"></div>
 
-    <!-- vitesse -->
-    <div class="speedBox">
-      <span class="chip">Vitesse d’attaque</span>
+    <div class="speed">
+      <span class="chip">Vitesse</span>
       <button class="btn on" data-speed="1">x1</button>
       <button class="btn" data-speed="2">x2</button>
       <button class="btn" data-speed="3">x3</button>
@@ -176,473 +162,279 @@ body{
 </div>
 
 <!-- PANELS -->
-<div id="panel-improve" class="panel">
-  <div class="wrap">
-    <button class="sec back" data-close>← Retour</button>
-    <h2>Améliorations</h2>
-    <div id="improveWrap" class="grid"></div>
+<div id="panel-improve" class="panel"><div class="wrap">
+  <button class="back btn" data-close>← Retour</button>
+  <h2>Améliorations</h2>
+  <div id="improveGrid" class="grid"></div>
+</div></div>
+
+<div id="panel-summon" class="panel"><div class="wrap">
+  <button class="back btn" data-close>← Retour</button>
+  <h2>Tirage</h2>
+  <div class="grid" style="grid-template-columns:repeat(2,1fr)">
+    <button class="btn" id="pull1">🎴 Tirage unique<br><span class="small">(100💎)</span></button>
+    <button class="btn" id="pull10">🎴🎴 Tirage x10<br><span class="small">(900💎)</span></button>
   </div>
+  <div class="small" style="margin-top:10px;opacity:.8">Astuce : les cartes s’affichent en plein écran.</div>
+</div></div>
+
+<div id="panel-bag" class="panel"><div class="wrap">
+  <button class="back btn" data-close>← Retour</button>
+  <h2>Inventaire</h2>
+  <div id="bagGrid" class="grid"></div>
+</div></div>
+
+<div id="panel-dex" class="panel"><div class="wrap">
+  <button class="back btn" data-close>← Retour</button>
+  <h2>Classeur</h2>
+  <div id="dexGrid" class="grid"></div>
+</div></div>
+
+<div id="panel-shop" class="panel"><div class="wrap">
+  <button class="back btn" data-close>← Retour</button>
+  <h2>Boutique</h2>
+  <div class="grid" style="grid-template-columns:repeat(3,1fr)">
+    <button class="btn" id="daily">📦 Coffre quotidien (gratuit)</button>
+    <button class="btn" id="buyGold">🪙 +50 000 (2 000💎)</button>
+    <button class="btn" id="buyGems">💎 +2 000 (50 000🪙)</button>
+  </div>
+  <div class="small" style="margin-top:10px;opacity:.8">Les récompenses s’affichent en plein écran.</div>
+</div></div>
+
+<div id="panel-promo" class="panel"><div class="wrap">
+  <button class="back btn" data-close>← Retour</button>
+  <h2>Code promo</h2>
+  <div class="grid" style="grid-template-columns:2fr 1fr">
+    <input id="promoInput" class="btn" placeholder="MEGA-START">
+    <button class="btn" id="applyPromo">Valider</button>
+  </div>
+</div></div>
+
+<!-- OVERLAYS -->
+<div id="overlay" class="overlay">
+  <button class="back btn" id="closeOverlay" style="position:absolute;left:16px;top:16px">← Retour</button>
+  <div id="overWrap" class="overWrap"></div>
 </div>
 
-<div id="panel-summon" class="panel">
-  <div class="wrap">
-    <button class="sec back" data-close>← Retour</button>
-    <h2>Tirage</h2>
-    <div class="row">
-      <button class="btn" id="pull1">Tirage unique (100 💎)</button>
-      <button class="btn" id="pull10">Tirage x10 (900 💎)</button>
-    </div>
-    <div class="hr"></div>
-    <div id="summonResult" class="grid"></div>
-  </div>
-</div>
-
-<div id="panel-bag" class="panel">
-  <div class="wrap">
-    <button class="sec back" data-close>← Retour</button>
-    <h2>Inventaire</h2>
-    <div id="bagWrap" class="grid"></div>
-  </div>
-</div>
-
-<div id="panel-dex" class="panel">
-  <div class="wrap">
-    <button class="sec back" data-close>← Retour</button>
-    <h2>Classeur</h2>
-    <div id="dexWrap" class="grid"></div>
-  </div>
-</div>
-
-<div id="panel-shop" class="panel">
-  <div class="wrap">
-    <button class="sec back" data-close>← Retour</button>
-    <h2>Boutique</h2>
-    <div class="row">
-      <button class="btn" id="daily">Coffre quotidien (gratuit)</button>
-      <button class="btn" id="buyGold">+10 000 🪙 (100 💎)</button>
-    </div>
-  </div>
-</div>
-
-<div id="panel-promo" class="panel">
-  <div class="wrap">
-    <button class="sec back" data-close>← Retour</button>
-    <h2>Code promo</h2>
-    <div class="row">
-      <input id="promoInput" class="btn" style="width:220px" placeholder="Code…">
-      <button class="btn" id="applyPromo">Valider</button>
-    </div>
-    <p class="muted">Astuce : <span class="ok">MEGA-START</span> pour tester.</p>
+<!-- MODAL DINO -->
+<div id="modal" class="modal">
+  <div class="mwrap">
+    <button class="back btn" id="closeModal">← Retour</button>
+    <div id="modalBody"></div>
   </div>
 </div>
 
 <div id="toast" class="toast"></div>
-<div class="debug" id="debug">debug : ok</div>
 
 <script>
-/*------------------------- STATE -------------------------*/
-const $ = sel => document.querySelector(sel);
-const $$ = sel => document.querySelectorAll(sel);
-const rand = (a,b)=>Math.floor(Math.random()*(b-a+1))+a;
-const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+/* ==== Utils ==== */
+const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+const nf=n=>Math.floor(n).toLocaleString('fr-FR');
+const rc={BASIC:'#64748b',RARE:'#38bdf8',EPIC:'#a78bfa',LEG:'#f59e0b',SUP:'#22d3b6'};
+const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
 
-const POOL = [
-  {id:'raptor', name:'Petit Raptor', emoji:'🦕', rarity:'BASIC', hp:120, atk:8, def:2, spd:1.2},
-  {id:'trike',  name:'Trihorn',      emoji:'🦖', rarity:'RARE',  hp:160, atk:12, def:4, spd:1.2},
-  {id:'ptero',  name:'Aéroptère',    emoji:'🦅', rarity:'EPIC',  hp:140, atk:16, def:3, spd:1.0},
-  {id:'rex',    name:'Rex Alpha',    emoji:'🦂', rarity:'LEG',   hp:180, atk:22, def:6, spd:1.1},
-  {id:'spino',  name:'Spino Suprême',emoji:'🐉', rarity:'SUP',   hp:220, atk:30, def:8, spd:0.9}
+/* ==== Data ==== */
+const POOL=[ // dinos
+ {id:'raptor',name:'Petit Raptor',emoji:'🦕',rarity:'BASIC',hp:120,atk:8,def:2,spd:1.2},
+ {id:'trike', name:'Trihorn',emoji:'🦖',rarity:'RARE',hp:160,atk:12,def:4,spd:1.2},
+ {id:'ptero', name:'Aéroptère',emoji:'🦅',rarity:'EPIC',hp:140,atk:16,def:3,spd:1.0},
+ {id:'rex',   name:'Rex Alpha',emoji:'🦂',rarity:'LEG',hp:190,atk:22,def:7,spd:1.1},
+ {id:'spino', name:'Spino Suprême',emoji:'🐉',rarity:'SUP',hp:230,atk:28,def:9,spd:0.9}
 ];
-
-const ITEMS = [
-  {id:'sword1', cat:'atk',  name:'Griffe aiguisée',  val:+4,  rarity:'BASIC'},
-  {id:'shield1',cat:'def',  name:'Cuirasse osseuse', val:+2,  rarity:'BASIC'},
-  {id:'heart1', cat:'hp',   name:'Écaille vitale',   val:+20, rarity:'BASIC'},
-  {id:'sword2', cat:'atk',  name:'Crocs runiques',   val:+8,  rarity:'RARE'},
-  {id:'shield2',cat:'def',  name:'Carapace dure',    val:+4,  rarity:'RARE'},
-  {id:'heart2', cat:'hp',   name:'Noyau primal',     val:+40, rarity:'RARE'},
-  {id:'sword3', cat:'atk',  name:'Lame du ciel',     val:+12, rarity:'EPIC'},
-  {id:'shield3',cat:'def',  name:'Bouclier onyx',    val:+6,  rarity:'EPIC'},
-  {id:'heart3', cat:'hp',   name:'Cœur draconique',  val:+60, rarity:'EPIC'},
-  {id:'sword4', cat:'atk',  name:'Crocs stellaires', val:+18, rarity:'LEG'},
-  {id:'shield4',cat:'def',  name:'Mur d’obsidienne', val:+10, rarity:'LEG'},
-  {id:'heart4', cat:'hp',   name:'Sang ancestral',   val:+90, rarity:'LEG'},
-  {id:'sword5', cat:'atk',  name:'Épée suprême',     val:+26, rarity:'SUP'},
-  {id:'shield5',cat:'def',  name:'Rempart suprême',  val:+16, rarity:'SUP'},
-  {id:'heart5', cat:'hp',   name:'Cœur suprême',     val:+140,rarity:'SUP'}
+const ITEMS=[ // objets
+ {id:'sA1',cat:'atk',name:'Griffe aiguisée',val:4,rarity:'BASIC'},
+ {id:'sA2',cat:'atk',name:'Crocs runiques',val:8,rarity:'RARE'},
+ {id:'sA3',cat:'atk',name:'Lame du ciel',val:12,rarity:'EPIC'},
+ {id:'sA4',cat:'atk',name:'Crocs stellaires',val:18,rarity:'LEG'},
+ {id:'sA5',cat:'atk',name:'Épée suprême',val:26,rarity:'SUP'},
+ {id:'sD1',cat:'def',name:'Cuirasse osseuse',val:2,rarity:'BASIC'},
+ {id:'sD2',cat:'def',name:'Carapace dure',val:4,rarity:'RARE'},
+ {id:'sD3',cat:'def',name:'Bouclier onyx',val:6,rarity:'EPIC'},
+ {id:'sD4',cat:'def',name:'Mur d’obsidienne',val:10,rarity:'LEG'},
+ {id:'sD5',cat:'def',name:'Rempart suprême',val:16,rarity:'SUP'},
+ {id:'sH1',cat:'hp', name:'Écaille vitale',val:20,rarity:'BASIC'},
+ {id:'sH2',cat:'hp', name:'Noyau primal',val:40,rarity:'RARE'},
+ {id:'sH3',cat:'hp', name:'Cœur draconique',val:60,rarity:'EPIC'},
+ {id:'sH4',cat:'hp', name:'Sang ancestral',val:90,rarity:'LEG'},
+ {id:'sH5',cat:'hp', name:'Cœur suprême',val:140,rarity:'SUP'},
 ];
-
-const rarityColor = {BASIC:'#64748b', RARE:'#38bdf8', EPIC:'#a78bfa', LEG:'#f59e0b', SUP:'#f43f5e'};
-
-const S = {
-  lvl:1, zone:1, speed:1,
-  gold:0, gems:0,
-  collection:[], // tous les dinos acquis
-  team:[],       // 1..5 actifs
-  bag:[],        // objets
-  equip: {},     // equip[ dinoId ] = {atk:id, def:id, hp:id}
-  enemy:null,
-  last: performance.now()
+/* ==== Save ==== */
+let S=JSON.parse(localStorage.getItem("dq_deluxe")||"null")||{
+ lvl:1,gold:0,gems:0,speed:1,
+ collection:[],team:[],bag:[],
+ enemy:null,last:performance.now()
 };
+function save(){localStorage.setItem("dq_deluxe",JSON.stringify(S));}
 
-/*--------------------- UTIL UI ---------------------*/
-function toast(msg, ms=1500){
-  const t=$("#toast"); t.textContent=msg; t.classList.add("show");
-  setTimeout(()=>t.classList.remove("show"), ms);
-}
-function openPanel(id){ $(`#panel-${id}`).classList.add("open"); }
-function closePanels(){ $$(".panel").forEach(p=>p.classList.remove("open")); }
-
-/*--------------------- INIT ---------------------*/
-function cloneDino(d){
-  return {uid:crypto.randomUUID(), ...d, curHP:d.hp, lvl:1, exp:0};
-}
-function baseSetup(){
-  if(!S.collection.length){
-    const base = POOL.find(d=>d.rarity==="BASIC");
-    S.collection=[ cloneDino(base) ];
-  }
-  if(!S.team.length){
-    S.team=[ {...S.collection[0]} ];
-  }
-  setWorld(S.lvl);
-  newEnemy();
-  ui();
-  renderTeam();
-}
-function setWorld(lvl){
-  $("#lvl").textContent = lvl;
-}
-
-/*--------------------- ENEMY ---------------------*/
+/* ==== Base init ==== */
+function cloneDino(base){return{uid:crypto.randomUUID(),...base,curHP:base.hp,lvl:1,exp:0,equip:{atk:null,def:null,hp:null}};}
+if(!S.collection.length){S.collection=[cloneDino(POOL[0])];}
+if(!S.team.length){S.team=[S.collection[0]];}
+/* ==== UI Head ==== */
+function ui(){ $("#lvl").textContent=S.lvl; $("#gold").textContent=nf(S.gold); $("#gems").textContent=nf(S.gems); }
+/* ==== Enemy ==== */
 function newEnemy(){
-  const pool = ["🦎","🦂","🦖","🐍","🦈"];
-  const emoji = pool[rand(0,pool.length-1)];
-  const hp = 80 + S.lvl*20;
-  const atk = 6 + Math.floor(S.lvl*1.5);
-  const def = 2 + Math.floor(S.lvl/3);
-  S.enemy = {name:`Niv. ${S.lvl} — Lézard Sauvage`, emoji, hp, cur:hp, atk, def};
-  $("#enemyName").textContent = S.enemy.name;
-  $("#enemyStats").textContent = `ATK ${atk} • DEF ${def}`;
-  $("#enemyHP").style.width = "100%";
-  $("#enemySprite").textContent = emoji;
+  const emo=["🦎","🦂","🦖","🐊","🐍"][rnd(0,4)];
+  const hp=90+S.lvl*24, atk=7+Math.floor(S.lvl*1.6), def=2+Math.floor(S.lvl*0.6);
+  S.enemy={name:`Niv. ${S.lvl} — Prédateur`,emoji:emo,hp,cur:hp,atk,def};
+  $("#enemyName").textContent=S.enemy.name; $("#enemyStats").textContent=`ATK ${atk} • DEF ${def}`;
+  $("#enemyHP").style.width="100%"; $("#enemySprite").textContent=emo;
 }
-
-/*--------------------- RENDER ---------------------*/
+/* ==== Team render ==== */
+function totalAtk(d){const b=(d.equip.atk&&ITEMS.find(i=>i.id===d.equip.atk)?.val)||0;return d.atk+b+Math.floor((d.lvl-1)*1.5);}
+function totalDef(d){const b=(d.equip.def&&ITEMS.find(i=>i.id===d.equip.def)?.val)||0;return d.def+b+Math.floor((d.lvl-1)*0.8);}
+function totalHP(d){const b=(d.equip.hp&&ITEMS.find(i=>i.id===d.equip.hp)?.val)||0;return d.hp+b;}
 function renderTeam(){
-  const row=$("#teamRow"); row.innerHTML="";
-  const max = Math.max(1, Math.min(5, S.team.length));
-  for(let i=0;i<max;i++){
-    const d = S.team[i] || S.collection[0];
-    const card = document.createElement("div");
-    card.className="teCard";
-    card.innerHTML = `
-       <div class="teName">${d.name} — <span style="color:${rarityColor[d.rarity]}">${d.rarity}</span></div>
-       <div class="hpbar"><i style="width:${Math.round(d.curHP/d.hp*100)}%"></i></div>
-       <div class="stat">PV ${d.curHP}/${d.hp} • ATK ${totalAtk(d)} • DEF ${totalDef(d)}</div>
-    `;
-    row.appendChild(card);
-  }
-  $("#allySprite").textContent = (S.team[0]||S.collection[0]).emoji;
+  const row=$("#teamRow");row.innerHTML="";
+  S.team.slice(0,5).forEach(d=>{
+    if(d.curHP>totalHP(d)) d.curHP=totalHP(d);
+    const t=document.createElement("div");t.className="te";
+    t.innerHTML=`<div class="teName">${d.emoji} ${d.name} <span style="color:${rc[d.rarity]}">• ${d.rarity}</span></div>
+    <div class="hpbar"><i style="width:${Math.round(d.curHP/totalHP(d)*100)}%"></i></div>
+    <div class="small">PV ${d.curHP}/${totalHP(d)} • ATK ${totalAtk(d)} • DEF ${totalDef(d)}</div>`;
+    t.onclick=()=>openDinoModal(d);
+    row.appendChild(t);
+  });
+  $("#allySprite").textContent=(S.team[0]||S.collection[0]).emoji;
 }
-
-function ui(){
-  $("#gold").textContent = S.gold;
-  $("#gems").textContent = S.gems;
-}
-
-/*--------------------- STATS + EQUIP ---------------------*/
-function eqFor(d){
-  return S.equip[d.uid] || (S.equip[d.uid]={});
-}
-function totalAtk(d){
-  const eq = eqFor(d);
-  const bonus = [eq.atk, eq.atk2].filter(Boolean).map(id=>ITEMS.find(i=>i.id===id)?.val||0).reduce((a,b)=>a+b,0);
-  return d.atk + bonus + Math.floor((d.lvl-1)*1.5);
-}
-function totalDef(d){
-  const eq = eqFor(d);
-  const bonus = [eq.def].filter(Boolean).map(id=>ITEMS.find(i=>i.id===id)?.val||0).reduce((a,b)=>a+b,0);
-  return d.def + bonus + Math.floor((d.lvl-1)*0.8);
-}
-
-/*--------------------- COMBAT LOOP ---------------------*/
-function hit(from, to, power, isEnemy=false){
-  const n = document.createElement("div");
-  n.className="particle";
-  n.style.left = (isEnemy? (window.innerWidth-160) : 120) + rand(-10,10) + "px";
-  n.style.top  = (isEnemy?  (window.innerHeight-330) : (window.innerHeight-180)) + rand(-8,8) + "px";
-  n.textContent = "✧";
-  document.body.appendChild(n);
-  setTimeout(()=>n.remove(), 520);
-
-  const dmg = Math.max(1, power - to.def);
-  to.cur = clamp(to.cur - dmg, 0, to.cur);
-  return dmg;
-}
-
+/* ==== Combat loop ==== */
+function toast(t,ms=1400){const n=$("#toast");n.textContent=t;n.classList.add("show");setTimeout(()=>n.classList.remove("show"),ms);}
+function msg(t){$("#msg").textContent=t;}
 function loop(now){
-  const dt = (now - S.last)/1000; S.last = now;
-  const step = dt * (S.speed||1);
-
-  // Allies attack sequentially
-  if(S.enemy && S.enemy.cur>0){
-    for(let i=0;i<Math.min(5,S.team.length);i++){
-      const d = S.team[i]; if(!d) continue;
-      d._t = (d._t || 0) + step;
-      const period = (d.spd || 1.2) / (S.speed||1);
-      if(d._t >= period){
-        d._t = 0;
-        const power = totalAtk(d);
-        hit(d, S.enemy, power, false);
-        S.enemy.cur = clamp(S.enemy.cur - Math.max(1, power - S.enemy.def), 0, S.enemy.hp);
-      }
+  const dt=(now-S.last)/1000;S.last=now;const sp=S.speed||1, step=dt*sp;
+  if(S.enemy&&S.enemy.cur>0){
+    S.team.slice(0,5).forEach(d=>{
+      d._t=(d._t||0)+step; const per=Math.max(0.6,(d.spd||1.2));
+      if(d._t>=per){d._t=0; const dmg=Math.max(1,totalAtk(d)-Math.floor(S.enemy.def*0.35)); S.enemy.cur=Math.max(0,S.enemy.cur-dmg); $("#enemyHP").style.width=(S.enemy.cur/S.enemy.hp*100)+"%";}
+    });
+    // riposte
+    S.enemy._t=(S.enemy._t||0)+step;
+    if(S.enemy._t>=1.25){S.enemy._t=0; const idx=rnd(0,Math.min(4,S.team.length-1));const d=S.team[idx];
+      if(d){const dmg=Math.max(1,S.enemy.atk-totalDef(d)); d.curHP=Math.max(0,d.curHP-dmg);}
     }
+    renderTeam();
   }
-
-  // Enemy retaliates random ally
-  if(S.enemy && S.enemy.cur>0){
-    S.enemy._t = (S.enemy._t||0) + step;
-    if(S.enemy._t >= 1.2/(S.speed||1)){ // enemy speed
-      S.enemy._t = 0;
-      const idx = rand(0, Math.min(4,S.team.length-1));
-      const d = S.team[idx]; if(d){
-        hit(S.enemy, d, S.enemy.atk, true);
-        d.curHP = clamp(d.curHP - Math.max(1, S.enemy.atk - totalDef(d)), 0, d.hp);
-      }
-    }
+  // win/defeat
+  if(S.enemy&&S.enemy.cur<=0){
+    const gold=10+S.lvl*6; S.gold+=gold; if(S.lvl%15===0){S.gems+=10; toast("Boss vaincu +10💎");}
+    S.lvl++; ui(); save(); newEnemy(); msg(`+${nf(gold)}🪙`);
+  }else if(S.team.every(d=>d.curHP<=0)){
+    S.team.forEach(d=>d.curHP=totalHP(d)); toast("Équipe vaincue — on retente !");
   }
-
-  // Update bars
-  if(S.enemy){
-    $("#enemyHP").style.width = (S.enemy.cur/S.enemy.hp*100) + "%";
-  }
-  renderTeam();
-
-  // Victory / Defeat
-  if(S.enemy && S.enemy.cur<=0){
-    S.gold += 10 + S.lvl*6;
-    if(S.lvl%15===0) S.gems += 10;
-    S.lvl++; ui(); setWorld(S.lvl); newEnemy();
-  }else{
-    // team dead ?
-    const alive = S.team.some(d=>d.curHP>0);
-    if(!alive){
-      // retour début de la zone
-      S.team.forEach(d=>d.curHP=d.hp);
-      toast("Équipe vaincue — on retente la zone !");
-    }
-  }
-
   requestAnimationFrame(loop);
 }
 
-/*--------------------- PANELS CONTENT ---------------------*/
-function renderImprove(){
-  const w=$("#improveWrap"); w.innerHTML="";
-  S.team.slice(0,5).forEach(d=>{
-    const eq=eqFor(d);
-    const t=document.createElement('div'); t.className="tile";
-    t.innerHTML=`
-      <div class="kv"><b>${d.name}</b><span style="color:${rarityColor[d.rarity]}">${d.rarity}</span></div>
-      <div class="row" style="margin-top:6px">
-        <button class="btn" data-up="hp"  data-id="${d.uid}">+20 PV (500🪙)</button>
-        <button class="btn" data-up="atk" data-id="${d.uid}">+2 ATK (500🪙)</button>
-        <button class="btn" data-up="def" data-id="${d.uid}">+1 DEF (500🪙)</button>
-      </div>
-      <div class="hr"></div>
-      <div class="kv">Équipement</div>
-      <div class="row">
-        <button class="sec" data-eq="atk" data-id="${d.uid}">ATK: ${eq.atk? ITEMS.find(i=>i.id===eq.atk).name : '—'}</button>
-        <button class="sec" data-eq="def" data-id="${d.uid}">DEF: ${eq.def? ITEMS.find(i=>i.id===eq.def).name : '—'}</button>
-        <button class="sec" data-eq="hp"  data-id="${d.uid}">PV: ${eq.hp?  ITEMS.find(i=>i.id===eq.hp ).name : '—'}</button>
-      </div>
-    `;
-    w.appendChild(t);
-  });
+/* ==== Panels & Menu ==== */
+function openPanel(id){$$('.panel').forEach(p=>p.classList.remove('open'));$(`#panel-${id}`).classList.add('open');$("#menu").classList.remove('open');$("#ham").setAttribute('aria-expanded','false');}
+function closePanels(){$$('.panel').forEach(p=>p.classList.remove('open'));}
+$("#ham").onclick=(e)=>{e.stopPropagation();const m=$("#menu");const open=!m.classList.contains("open");m.classList.toggle("open",open);$("#ham").setAttribute("aria-expanded",open?"true":"false");};
+document.addEventListener("click",(e)=>{const m=$("#menu"); if(!m.classList.contains("open"))return; if(e.target.closest("#menu")||e.target.closest("#ham"))return; m.classList.remove("open");$("#ham").setAttribute("aria-expanded","false");},{capture:true});
+$$('#menu a, .qbtn').forEach(a=>a.onclick=(ev)=>{ev.preventDefault();const tab=a.dataset.tab;if(tab==="improve")renderImprove();if(tab==="bag")renderBag();if(tab==="dex")renderDex();openPanel(tab);});
+$$('[data-close]').forEach(b=>b.onclick=()=>closePanels());
+$$('[data-speed]').forEach(b=>b.onclick=()=>{$$('[data-speed]').forEach(x=>x.classList.remove('on'));b.classList.add('on');S.speed=+b.dataset.speed;save();});
 
-  w.querySelectorAll("[data-up]").forEach(b=>{
-    b.onclick=()=>{
-      const d = S.team.find(x=>x.uid===b.dataset.id); if(!d) return;
-      if(S.gold<500){ toast("Pas assez d’or"); return; }
-      S.gold-=500;
-      if(b.dataset.up==="hp"){ d.hp+=20; d.curHP+=20; }
-      if(b.dataset.up==="atk"){ d.atk+=2; }
-      if(b.dataset.up==="def"){ d.def+=1; }
-      ui(); renderImprove(); renderTeam();
-    };
-  });
-  // equip depuis inventaire
-  w.querySelectorAll("[data-eq]").forEach(b=>{
-    b.onclick=()=>{
-      const d = S.team.find(x=>x.uid===b.dataset.id); if(!d) return;
-      // filtre items compatibles
-      const list = S.bag.filter(i=>i.cat===b.dataset.eq);
-      if(!list.length){ toast("Aucun objet compatible"); return; }
-      const it = list[0];
-      eqFor(d)[b.dataset.eq] = it.id;
-      // retirer 1 de l'inventaire
-      const idx = S.bag.findIndex(x=>x===it); if(idx>-1) S.bag.splice(idx,1);
-      renderImprove(); renderTeam();
-    };
+/* ==== Improve & Modal ==== */
+function rarityClass(r){return r==='SUP'?'rSup':r==='LEG'?'rLeg':r==='EPIC'?'rEpic':r==='RARE'?'rRare':'rBasic';}
+function renderImprove(){
+  const w=$("#improveGrid");w.innerHTML="";
+  S.collection.forEach(d=>{
+    const t=document.createElement('div');t.className=`tile ${rarityClass(d.rarity)}`;
+    t.innerHTML=`<div class="kv"><b>${d.emoji} ${d.name}</b><span style="color:${rc[d.rarity]}">${d.rarity}</span></div>
+      <div class="small">Niv. ${d.lvl} • PV ${d.curHP}/${totalHP(d)} • ATK ${totalAtk(d)} • DEF ${totalDef(d)}</div>
+      <div class="small" style="margin-top:6px">Touchez pour gérer</div>`;
+    t.onclick=()=>openDinoModal(d); w.appendChild(t);
   });
 }
-
-function renderBag(){
-  const w=$("#bagWrap"); w.innerHTML="";
-  if(!S.bag.length){ w.innerHTML='<div class="tile">Inventaire vide</div>'; return; }
-  S.bag.forEach(it=>{
-    const t=document.createElement('div'); t.className="tile";
-    t.innerHTML=`<div class="kv"><b>${it.name}</b><span style="color:${rarityColor[it.rarity]}">${it.rarity}</span></div>
-                 <div class="muted">+${it.val} ${it.cat.toUpperCase()}</div>`;
-    w.appendChild(t);
+function openDinoModal(d){
+  const body=$("#modalBody");
+  body.innerHTML=`<h3 style="margin:0 0 8px 0">${d.emoji} ${d.name} <span class="small" style="color:${rc[d.rarity]}">• ${d.rarity}</span></h3>
+    <div class="small" style="margin-bottom:8px">Niv. ${d.lvl} — PV ${d.curHP}/${totalHP(d)} — ATK ${totalAtk(d)} — DEF ${totalDef(d)}</div>
+    <div class="bigActions">
+      <button class="bigBtn" id="btnUp">⬆️ Améliorer (500🪙 ${d.lvl>=15?'+ 20💎':''})</button>
+      <button class="bigBtn" id="btnEq">🧩 Équiper</button>
+    </div>
+    <div id="equipArea" style="display:none">
+      <h4>Équipement</h4>
+      <div class="slotRow">
+        ${['atk','def','hp'].map(k=>`<div class="slot"><b>${k.toUpperCase()}</b><div class="small" id="slot-${k}">${d.equip[k]?ITEMS.find(i=>i.id===d.equip[k]).name:'—'}</div><button class="btn small" data-pick="${k}">Choisir</button></div>`).join('')}
+      </div>
+    </div>`;
+  $("#btnUp").onclick=()=>{const cost=500;const gem=d.lvl>=15?20:0;if(S.gold<cost||S.gems<gem){toast("Ressources insuffisantes");return;}S.gold-=cost;S.gems-=gem;d.lvl++;d.hp+=20;d.atk+=2;d.def+=1;d.curHP=totalHP(d);ui();renderTeam();renderImprove();openDinoModal(d);save();};
+  $("#btnEq").onclick=()=>{document.getElementById('equipArea').style.display='block';};
+  document.querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>pickItem(d,b.dataset.pick));
+  $("#modal").classList.add("show");
+}
+$("#closeModal").onclick=()=>$("#modal").classList.remove("show");
+function pickItem(d,cat){
+  // overlay list of items
+  showOverlay([]);
+  const wrap=$("#overWrap"); wrap.innerHTML="";
+  const candidates=S.bag.filter(i=>i.cat===cat);
+  if(!candidates.length){wrap.innerHTML='<div class="card">Aucun objet compatible</div>';return;}
+  candidates.forEach((it,i)=>{
+    const c=document.createElement('div');c.className=`card pop ${rarityClass(it.rarity)}`;
+    c.innerHTML=`<div class="em">🎁</div><div class="rn" style="color:${rc[it.rarity]}">${it.rarity}</div><div>${it.name}</div><div class="small">+${it.val} ${cat.toUpperCase()}</div><button class="btn" data-sel="${i}">Équiper</button>`;
+    wrap.appendChild(c);
   });
+  wrap.querySelectorAll("[data-sel]").forEach(b=>b.onclick=()=>{const it=candidates[b.dataset.sel|0]; // retire du sac
+    const idx=S.bag.indexOf(it); if(idx>-1) S.bag.splice(idx,1);
+    // remet l'ancien au sac
+    if(d.equip[cat]){const prev=ITEMS.find(x=>x.id===d.equip[cat]);if(prev)S.bag.push(prev);}
+    d.equip[cat]=it.id; renderTeam(); renderImprove(); openDinoModal(d); hideOverlay(); save();});
+}
+
+/* ==== Inventory & Dex ==== */
+function renderBag(){
+  const g=$("#bagGrid");g.innerHTML="";
+  if(!S.bag.length){g.innerHTML='<div class="tile">Inventaire vide</div>';return;}
+  S.bag.forEach(it=>{const t=document.createElement('div');t.className=`tile ${rarityClass(it.rarity)}`;t.innerHTML=`<div class="kv"><b>${it.name}</b><span style="color:${rc[it.rarity]}">${it.rarity}</span></div><div class="small">+${it.val} ${it.cat.toUpperCase()}</div>`;g.appendChild(t);});
 }
 function renderDex(){
-  const w=$("#dexWrap"); w.innerHTML="";
+  const g=$("#dexGrid");g.innerHTML="";
   const have=new Set(S.collection.map(d=>d.id));
-  POOL.forEach(d=>{
-    const got = have.has(d.id);
-    const t=document.createElement('div'); t.className="tile";
-    t.style.opacity = got? 1 :.4;
-    t.innerHTML=`<div class="kv"><b>${d.name}</b><span style="color:${rarityColor[d.rarity]}">${d.rarity}</span></div>
-                 <div style="font-size:40px;margin-top:8px">${d.emoji}</div>`;
-    w.appendChild(t);
+  POOL.forEach(p=>{const own=have.has(p.id);const t=document.createElement('div');t.className=`tile ${rarityClass(p.rarity)}`;t.style.opacity=own?1:.5;t.innerHTML=`<div class="kv"><b>${p.name}</b><span style="color:${rc[p.rarity]}">${p.rarity}</span></div><div style="font-size:40px;margin-top:8px">${p.emoji}</div><div class="small">${own?'Débloqué':'Non obtenu'}</div>`;g.appendChild(t);});
+}
+
+/* ==== Overlay (tirage / coffre / packs / pick) ==== */
+function showOverlay(list){$("#overlay").classList.add("show"); if(list&&list.length) fillOverlay(list);}
+function hideOverlay(){$("#overlay").classList.remove("show"); $("#overWrap").innerHTML="";}
+$("#closeOverlay").onclick=hideOverlay;
+function fillOverlay(items){
+  const wrap=$("#overWrap");wrap.innerHTML="";
+  items.forEach((r,i)=>{
+    const d=document.createElement('div'); d.className=`card pop ${rarityClass(r.rarity)}`;
+    d.style.animationDelay=(i*120)+'ms';
+    d.innerHTML=`<div class="em">${r.emoji||'🎁'}</div><div class="rn" style="color:${rc[r.rarity]}">${r.rarity}</div><div>${r.name}</div>${r.extra?`<div class="small">${r.extra}</div>`:''}`;
+    wrap.appendChild(d);
   });
 }
 
-/*--------------------- SUMMON + SHOP + PROMO ---------------------*/
-function grantItem(r){
-  const pool = ITEMS.filter(x=>x.rarity===r);
-  return {...pool[rand(0,pool.length-1)]};
-}
-function grantDino(r){
-  const pool = POOL.filter(x=>x.rarity===r);
-  return cloneDino(pool[rand(0,pool.length-1)]);
-}
-function rollRarity(kind="dino"){
-  // dino rates
-  if(kind==="dino"){
-    const r = Math.random();
-    if(r<0.50) return "BASIC";
-    if(r<0.80) return "RARE";
-    if(r<0.94) return "EPIC";
-    if(r<0.995) return "LEG";
-    return "SUP";
-  }else{ // item chest
-    const r = Math.random();
-    if(r<0.55) return "BASIC";
-    if(r<0.83) return "RARE";
-    if(r<0.95) return "EPIC";
-    if(r<0.995) return "LEG";
-    return "SUP";
-  }
-}
+/* ==== Summon ==== */
+function rollRarity(kind){const r=Math.random();if(kind==='item'){if(r<.55)return'BASIC';if(r<.83)return'RARE';if(r<.95)return'EPIC';if(r<.995)return'LEG';return'SUP';}else{if(r<.50)return'BASIC';if(r<.80)return'RARE';if(r<.94)return'EPIC';if(r<.995)return'LEG';return'SUP';}}
+function grantItem(r){const c=ITEMS.filter(x=>x.rarity===r);return {...c[rnd(0,c.length-1)]};}
+function grantDino(r){const c=POOL.filter(x=>x.rarity===r|| (r==='BASIC'&&x.rarity==='BASIC'));const base=c[rnd(0,c.length-1)];const d=cloneDino(base);S.collection.push(d);if(S.team.length<5)S.team.push(d);return d;}
 function doPull(n){
-  const cost = n===10? 900 : 100;
-  if(S.gems<cost){ toast("Pas assez de gemmes"); return; }
-  S.gems-=cost; ui();
-  const wrap=$("#summonResult"); wrap.innerHTML="";
-  for(let i=0;i<n;i++){
-    const isDino = Math.random()<0.6; // 60% dino, 40% item
-    if(isDino){
-      const d = grantDino(rollRarity("dino")); S.collection.push(d);
-      const t=document.createElement('div'); t.className="tile"; t.style.borderColor=rarityColor[d.rarity];
-      t.innerHTML=`<div class="kv"><b>${d.name}</b><span style="color:${rarityColor[d.rarity]}">${d.rarity}</span></div>
-                   <div style="font-size:38px;margin-top:6px">${d.emoji}</div>`;
-      wrap.appendChild(t);
-    }else{
-      const it = grantItem(rollRarity("item")); S.bag.push(it);
-      const t=document.createElement('div'); t.className="tile"; t.style.borderColor=rarityColor[it.rarity];
-      t.innerHTML=`<div class="kv"><b>${it.name}</b><span style="color:${rarityColor[it.rarity]}">${it.rarity}</span></div>
-                   <div class="muted">+${it.val} ${it.cat.toUpperCase()}</div>`;
-      wrap.appendChild(t);
-    }
-  }
-  renderDex(); renderBag();
+  const cost=n===10?900:100;if(S.gems<cost){toast("Pas assez de gemmes");return;}S.gems-=cost;ui();
+  const out=[];for(let i=0;i<n;i++){if(Math.random()<0.6){const d=grantDino(rollRarity('dino'));out.push({type:'dino',name:d.name,emoji:d.emoji,rarity:d.rarity});}else{const it=grantItem(rollRarity('item'));S.bag.push(it);out.push({type:'item',name:it.name,emoji:'🎁',rarity:it.rarity,extra:`+${it.val} ${it.cat.toUpperCase()}`});}}
+  renderDex();renderBag();renderTeam();save(); showOverlay(out);
 }
-function dailyChest(){
-  const key="dino_daily";
-  const last=+localStorage.getItem(key)||0;
-  const now=Date.now();
-  if(now-last<24*3600*1000){ toast("Déjà pris aujourd’hui"); return; }
-  localStorage.setItem(key, now);
-  S.gold+=rand(500,2000); S.gems+=10; ui(); toast("Coffre quotidien ouvert !");
+$("#pull1").onclick=()=>doPull(1);
+$("#pull10").onclick=()=>doPull(10);
+
+/* ==== Shop ==== */
+function daily(){
+  const k="dq_daily";const last=+localStorage.getItem(k)||0;if(Date.now()-last<86400000){toast("Déjà pris aujourd’hui");return;}
+  localStorage.setItem(k,Date.now()); const out=[{rarity:'BASIC',name:'+1000 Or',emoji:'🪙',extra:'+1000'},{rarity:'BASIC',name:'+10 Gemmes',emoji:'💎',extra:'+10'}]; S.gold+=1000;S.gems+=10;ui();save();showOverlay(out);
 }
-function applyPromo(code){
-  if(code==="MEGA-START" && !localStorage.getItem("promo_ms")){
-    localStorage.setItem("promo_ms","1");
-    S.gold+=200000; S.gems+=50000; ui(); toast("Bonus ajouté !");
-  }else{
-    toast("Code invalide ou déjà utilisé");
-  }
-}
+$("#daily").onclick=daily;
+$("#buyGold").onclick=()=>{if(S.gems<2000){toast("Pas assez de gemmes");return;}S.gems-=2000;S.gold+=50000;ui();save();showOverlay([{rarity:'RARE',name:'+50 000 Or',emoji:'🪙',extra:'+50 000'}]);};
+$("#buyGems").onclick=()=>{if(S.gold<50000){toast("Pas assez d’or");return;}S.gold-=50000;S.gems+=2000;ui();save();showOverlay([{rarity:'RARE',name:'+2 000 Gemmes',emoji:'💎',extra:'+2 000'}]);};
 
-/*--------------------- MENU + PANELS + SPEED ---------------------*/
-function hooks(){
-  // hamburger
-  const ham=$("#ham"), menu=$("#menu");
-  ham.addEventListener("click",(e)=>{
-    e.stopPropagation();
-    const open = !menu.classList.contains("open");
-    menu.classList.toggle("open", open);
-    ham.setAttribute("aria-expanded", open?"true":"false");
-  });
-  document.addEventListener("click",(e)=>{
-    if(!menu.classList.contains("open")) return;
-    if(e.target.closest("#menu")||e.target.closest("#ham")) return;
-    menu.classList.remove("open"); ham.setAttribute("aria-expanded","false");
-  }, {capture:true});
+/* ==== Promo ==== */
+$("#applyPromo").onclick=()=>{const c=($("#promoInput").value||"").trim().toUpperCase();if(c==="MEGA-START"&&!localStorage.getItem("promo_ms")){localStorage.setItem("promo_ms","1");S.gold+=200000;S.gems+=50000;ui();save();showOverlay([{rarity:'LEG',name:'+200 000 Or',emoji:'🪙',extra:'+200 000'},{rarity:'LEG',name:'+50 000 Gemmes',emoji:'💎',extra:'+50 000'}]);}else toast("Code invalide ou déjà utilisé");};
 
-  // open panels
-  $$("#menu a").forEach(a=>{
-    a.onclick=(ev)=>{
-      ev.preventDefault();
-      menu.classList.remove("open"); ham.setAttribute("aria-expanded","false");
-      const tab=a.dataset.tab;
-      if(tab==="improve"){ renderImprove(); }
-      if(tab==="bag"){ renderBag(); }
-      if(tab==="dex"){ renderDex(); }
-      openPanel(tab);
-    };
-  });
-  // back buttons
-  $$("[data-close]").forEach(b=>b.onclick=()=>closePanels());
-
-  // speed
-  $$("[data-speed]").forEach(b=>{
-    b.onclick=()=>{
-      S.speed=+b.dataset.speed;
-      $$("[data-speed]").forEach(x=>x.classList.toggle("on", x===b));
-    };
-  });
-
-  // summon
-  $("#pull1").onclick=()=>doPull(1);
-  $("#pull10").onclick=()=>doPull(10);
-
-  // shop
-  $("#daily").onclick=dailyChest;
-  $("#buyGold").onclick=()=>{
-    if(S.gems<100){ toast("Pas assez de gemmes"); return; }
-    S.gems-=100; S.gold+=10000; ui(); toast("+10 000 or");
-  };
-
-  // promo
-  $("#applyPromo").onclick=()=>{
-    applyPromo( ($("#promoInput").value||"").trim().toUpperCase() );
-  };
-}
-
-/*--------------------- START ---------------------*/
-function start(){
-  baseSetup();
-  hooks();
-  // init speed buttons state
-  $$("[data-speed]").forEach(b=>b.classList.toggle("on", +b.dataset.speed===S.speed));
-  requestAnimationFrame(t=>{ S.last=t; loop(t); });
-}
-
+/* ==== Start ==== */
+function start(){ui();newEnemy();renderTeam();renderDex();requestAnimationFrame(t=>{S.last=t;loop(t);});}
 start();
 </script>
 </body>
