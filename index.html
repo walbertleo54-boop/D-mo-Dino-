@@ -1,491 +1,293 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Dino Quest — Deluxe</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Dino Quest — Reboot v1 (Phaser)</title>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
 <style>
-:root{
-  --bg:#090e16;--bg2:#0c1320;--panel:#0f172a;--panel2:#0b1322;--border:#1f2a44;
-  --txt:#e6eefc;--muted:#a9bbd6;--gold:#ffd37a;--gems:#7dd3fc;--hp:#28d0ff;
-  --rare:#38bdf8;--epic:#a78bfa;--leg:#f59e0b;--sup:#22d3b6;--shadow:0 10px 30px #0008;
-}
-*{box-sizing:border-box}html,body{height:100%}body{margin:0;background:
- radial-gradient(90vmax 60vmax at 30% -10%, #143a64 0%, transparent 55%),
- radial-gradient(70vmax 50vmax at 100% 0%, #0f2a4a 0%, transparent 55%),
- linear-gradient(180deg,var(--bg2),var(--bg));color:var(--txt);font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
-button{cursor:pointer}
-a{color:inherit}
-.hud{position:fixed;inset:0 0 auto 0;height:58px;padding:0 12px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(180deg,#0e1628ee,#0b1322aa,transparent);border-bottom:1px solid var(--border);z-index:60}
-.brand{font-weight:900;letter-spacing:.6px}
-.badges{display:flex;gap:10px;align-items:center}
-.badge{display:flex;gap:6px;align-items:center;padding:6px 10px;border:1px solid var(--border);border-radius:12px;background:linear-gradient(180deg,#0f182b,#0b1423);box-shadow:var(--shadow);font-weight:800}
-.ham{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:linear-gradient(180deg,#0e182a,#0b1322);display:grid;place-items:center}
-.ham span{display:block;width:16px;height:2px;background:#cfe0ff;position:relative}
-.ham span:before,.ham span:after{content:"";position:absolute;left:0;width:100%;height:2px;background:#cfe0ff}
-.ham span:before{top:-6px}.ham span:after{top:6px}
-
-/* quickbar */
-.quickbar{position:fixed;top:58px;left:0;right:0;z-index:55;display:flex;gap:10px;padding:10px 12px;overflow:auto;background:linear-gradient(180deg,rgba(13,19,32,.9),rgba(13,19,32,.55),transparent);border-bottom:1px solid var(--border)}
-.qbtn{flex:0 0 auto;display:flex;gap:10px;align-items:center;padding:10px 12px;border:1px solid var(--border);border-radius:14px;background:linear-gradient(180deg,#0f192b,#0b1423);box-shadow:var(--shadow);font-weight:800}
-.qbtn span{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:rgba(148,163,184,.12);font-size:18px}
-
-/* stage */
-.stage{position:absolute;inset:108px 0 0 0;overflow:hidden}
-.scene{position:absolute;inset:16px;overflow:hidden;border:1px solid var(--border);border-radius:18px;background:
- radial-gradient(80vmax 50vmax at 50% 5%, rgba(56,189,248,.18), transparent 60%),
- radial-gradient(60vmax 40vmax at 50% 100%, rgba(167,139,250,.12), transparent 55%);
-}
-.hint{position:absolute;left:50%;transform:translateX(-50%);top:14px;padding:8px 12px;border:1px dashed #2dd4bf;border-radius:10px;background:#0a1f20cc;color:#bffbe9}
-
-.enemyCard{position:absolute;right:26px;top:110px;width:320px;padding:14px;border:1px solid var(--border);border-radius:16px;background:linear-gradient(180deg,#0f1c2c,#0c1524);box-shadow:var(--shadow)}
-.cardTitle{font-weight:900;font-size:20px;margin:0 0 8px}
-.bar{height:10px;background:#081226;border:1px solid var(--border);border-radius:10px;overflow:hidden}
-.bar>i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#28d0ff,#7dd3fc)}
-.stat{color:var(--muted);font-weight:800;margin-top:8px}
-
-.teamRow{position:absolute;left:22px;right:22px;bottom:110px;display:flex;gap:12px}
-.te{flex:1;border:1px solid var(--border);border-radius:16px;background:linear-gradient(180deg,#0e1928,#0b1422);padding:12px;min-width:140px;box-shadow:var(--shadow)}
-.teName{font-weight:900}
-.hpbar{height:8px;margin-top:6px;background:#081226;border:1px solid var(--border);border-radius:10px;overflow:hidden}
-.hpbar>i{display:block;height:100%;background:linear-gradient(90deg,#28d0ff,#7dd3fc);width:100%}
-.sprite,.enemySprite{position:absolute;font-size:64px;filter:drop-shadow(0 12px 20px #0007);animation:float 2.6s ease-in-out infinite}
-.sprite{left:64px;bottom:210px}.enemySprite{right:108px;bottom:260px}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-
-.speed{position:absolute;right:14px;bottom:18px;display:flex;gap:8px;align-items:center}
-.chip{padding:8px 12px;border:1px solid var(--border);border-radius:12px;background:linear-gradient(180deg,#0f192b,#0b1423);color:#cfe0ff}
-.btn{padding:8px 12px;border:1px solid var(--border);border-radius:12px;background:linear-gradient(180deg,#0f192b,#0b1423);color:var(--txt);font-weight:800}
-.btn.on{outline:2px solid #5b5bf6}
-
-/* menu */
-.menu{position:fixed;top:58px;right:14px;width:260px;display:none;background:linear-gradient(180deg,#0e1728,#0b1423);border:1px solid var(--border);border-radius:16px;padding:8px;box-shadow:var(--shadow);z-index:70}
-.menu.open{display:block}
-.menu a{display:flex;gap:8px;align-items:center;padding:12px;border-radius:12px;text-decoration:none}
-.menu a:hover{background:rgba(148,163,184,.12)}
-
-/* panels */
-.panel{position:fixed;inset:0;display:none;z-index:75;background:radial-gradient(200vmax 120vmax at 50% -20%, rgba(59,130,246,.15), transparent 40%),linear-gradient(180deg, rgba(2,6,23,.9), rgba(2,6,23,.75));backdrop-filter:blur(6px)}
-.panel.open{display:block}
-.wrap{position:absolute;inset:82px 16px 16px 16px;border:1px solid var(--border);border-radius:16px;background:var(--panel2);padding:16px;overflow:auto}
-.back{position:absolute;left:16px;top:16px}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-@media(min-width:680px){.grid{grid-template-columns:repeat(3,1fr)}}
-@media(min-width:960px){.grid{grid-template-columns:repeat(4,1fr)}}
-.tile{border:1px solid var(--border);border-radius:14px;background:linear-gradient(180deg,#0e1828,#0b1322);padding:12px}
-.kv{display:flex;justify-content:space-between;align-items:center}
-.small{font-size:12px;color:var(--muted);font-weight:700}
-
-/* rarity glow */
-.rBasic{box-shadow:0 0 0 1px #64748b inset,0 0 22px #64748b33}
-.rRare{box-shadow:0 0 0 1px var(--rare) inset,0 0 26px #38bdf859}
-.rEpic{box-shadow:0 0 0 1px var(--epic) inset,0 0 28px #a78bfa66}
-.rLeg{box-shadow:0 0 0 1px var(--leg) inset,0 0 30px #f59e0b66}
-.rSup{box-shadow:0 0 0 1px var(--sup) inset,0 0 32px #22d3b666}
-
-/* overlay (tirage / coffre / pack) */
-.overlay{position:fixed;inset:0;background:rgba(2,6,23,.88);backdrop-filter:blur(8px);display:none;z-index:90}
-.overlay.show{display:block}
-.overWrap{position:absolute;inset:86px 16px 16px;display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
-.card{border:1px solid var(--border);border-radius:14px;background:linear-gradient(180deg,#0e1828,#0b1322);padding:12px;text-align:center;transform:scale(.9);opacity:0}
-.card .em{font-size:46px;margin:8px 0}
-.card .rn{font-weight:900}
-.pop{animation:popIn .34s ease-out forwards}
-@keyframes popIn{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
-
-/* modal dino (améliorer / équiper) */
-.modal{position:fixed;inset:0;background:rgba(10,14,24,.85);backdrop-filter:blur(6px);display:none;z-index:95}
-.modal.show{display:block}
-.mwrap{position:absolute;inset:100px 16px 16px;border:1px solid var(--border);background:var(--panel);border-radius:16px;padding:16px;overflow:auto}
-.bigActions{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}
-.bigBtn{flex:1;min-width:180px;padding:12px 14px;border:1px solid var(--border);border-radius:14px;background:linear-gradient(180deg,#0f1a2c,#0b1423);font-weight:900;display:flex;gap:10px;align-items:center;justify-content:center}
-.slotRow{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.slot{border:1px dashed var(--border);border-radius:12px;padding:10px;min-height:70px;text-align:center}
-.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#111827dd;border:1px solid #374151;color:#e5e7eb;border-radius:12px;padding:10px 14px;z-index:120;display:none}
-.toast.show{display:block}
+  html,body{height:100%;margin:0;background:#0b1020;font-family:Inter,system-ui}
+  #game{width:100vw;height:100vh;overflow:hidden}
+  .hud{position:fixed;top:0;left:0;right:0;height:64px;display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:linear-gradient(180deg,rgba(10,15,30,.7),transparent);pointer-events:none;z-index:5}
+  .hud .row{display:flex;gap:8px;pointer-events:auto}
+  .badge{display:flex;gap:8px;align-items:center;padding:8px 12px;border-radius:12px;border:1px solid #1f2b44;background:linear-gradient(180deg,#0f1a2c,#0b1422);color:#e6f0ff;font-weight:800}
+  .btn{padding:8px 12px;border-radius:10px;border:1px solid #20304d;background:linear-gradient(180deg,#0f1c32,#0a1322);color:#e8f0ff;font-weight:800;cursor:pointer}
+  .btn.on{outline:2px solid #5564ff}
+  .overlay{position:fixed;inset:0;display:none;grid-template-rows:64px 1fr;background:rgba(8,12,24,.88);backdrop-filter:blur(8px);z-index:10}
+  .overlay.show{display:grid}
+  .overTop{display:flex;align-items:center;gap:8px;padding:12px}
+  .cards{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));padding:0 16px 16px}
+  .card{border:1px solid #233352;background:linear-gradient(180deg,#0e1a30,#0a1424);color:#def;border-radius:14px;padding:12px;text-align:center;transform:scale(.9);opacity:0;box-shadow:0 12px 28px #0006}
+  .card.show{animation:pop .25s ease-out forwards}
+  .em{font-size:42px;margin:8px 0}
+  .rn{font-weight:900}
+  .r-basic{box-shadow:0 0 0 1px #6b7b93 inset, 0 0 22px #6b7b9333}
+  .r-rare {box-shadow:0 0 0 1px #38bdf8 inset, 0 0 26px #38bdf859}
+  .r-epic {box-shadow:0 0 0 1px #a78bfa inset, 0 0 28px #a78bfa66}
+  .r-leg  {box-shadow:0 0 0 1px #f59e0b inset, 0 0 30px #f59e0b66}
+  .r-sup  {box-shadow:0 0 0 1px #22d3b6 inset, 0 0 32px #22d3b666}
+  @keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
 </style>
 </head>
 <body>
+<div id="game"></div>
 
-<!-- HUD -->
-<header class="hud">
-  <div class="brand">Dino<br>Quest</div>
-  <div class="badges">
-    <div class="badge">Lvl <span id="lvl">1</span></div>
-    <div class="badge">🪙 <span id="gold">0</span></div>
-    <div class="badge">💎 <span id="gems">0</span></div>
-    <button id="ham" class="ham" aria-expanded="false"><span></span></button>
+<!-- HUD (HTML) -->
+<div class="hud" id="hud">
+  <div class="row">
+    <div class="badge">Lvl&nbsp;<span id="lvl">1</span></div>
+    <div class="badge">🪙&nbsp;<span id="gold">0</span></div>
+    <div class="badge">💎&nbsp;<span id="gems">0</span></div>
   </div>
-</header>
-
-<!-- Quick icons -->
-<div class="quickbar">
-  <button class="qbtn" data-tab="improve"><span>🛠️</span><b>Améliorations</b></button>
-  <button class="qbtn" data-tab="summon"><span>🎴</span><b>Tirage</b></button>
-  <button class="qbtn" data-tab="bag"><span>🎒</span><b>Inventaire</b></button>
-  <button class="qbtn" data-tab="dex"><span>📘</span><b>Classeur</b></button>
-  <button class="qbtn" data-tab="shop"><span>🛍️</span><b>Boutique</b></button>
-</div>
-
-<!-- Menu -->
-<nav id="menu" class="menu">
-  <a href="#" data-tab="improve">🛠️ Améliorations</a>
-  <a href="#" data-tab="summon">🎴 Tirage</a>
-  <a href="#" data-tab="bag">🎒 Inventaire</a>
-  <a href="#" data-tab="dex">📘 Classeur</a>
-  <a href="#" data-tab="shop">🛍️ Boutique</a>
-  <a href="#" data-tab="promo">🎟️ Code promo</a>
-</nav>
-
-<!-- Stage Combat -->
-<div class="stage">
-  <div class="scene" id="scene">
-    <div class="hint" id="msg">Combat auto — Boss toutes les 15 zones (+10💎)</div>
-
-    <div class="enemyCard" id="enemyCard">
-      <div class="cardTitle" id="enemyName">Niv. 1 — Lézard Sauvage</div>
-      <div class="bar"><i id="enemyHP"></i></div>
-      <div class="stat" id="enemyStats">ATK 6 • DEF 2</div>
-    </div>
-
-    <div id="allySprite" class="sprite">🦕</div>
-    <div id="enemySprite" class="enemySprite">🦎</div>
-
-    <div id="teamRow" class="teamRow"></div>
-
-    <div class="speed">
-      <span class="chip">Vitesse</span>
-      <button class="btn on" data-speed="1">x1</button>
-      <button class="btn" data-speed="2">x2</button>
-      <button class="btn" data-speed="3">x3</button>
-    </div>
+  <div class="row">
+    <button class="btn" id="btnMenu">☰ Menu</button>
+    <button class="btn on" data-speed="1">x1</button>
+    <button class="btn" data-speed="2">x2</button>
+    <button class="btn" data-speed="3">x3</button>
   </div>
 </div>
 
-<!-- PANELS -->
-<div id="panel-improve" class="panel"><div class="wrap">
-  <button class="back btn" data-close>← Retour</button>
-  <h2>Améliorations</h2>
-  <div id="improveGrid" class="grid"></div>
-</div></div>
-
-<div id="panel-summon" class="panel"><div class="wrap">
-  <button class="back btn" data-close>← Retour</button>
-  <h2>Tirage</h2>
-  <div class="grid" style="grid-template-columns:repeat(2,1fr)">
-    <button class="btn" id="pull1">🎴 Tirage unique<br><span class="small">(100💎)</span></button>
-    <button class="btn" id="pull10">🎴🎴 Tirage x10<br><span class="small">(900💎)</span></button>
+<!-- Overlay (Tirage / Amélioration / Inventaire) -->
+<div class="overlay" id="overlay">
+  <div class="overTop">
+    <button class="btn" id="closeOverlay">← Retour</button>
+    <div class="badge" id="overlayTitle">Tirage</div>
+    <div style="margin-left:auto" class="row" id="overlayActions"></div>
   </div>
-  <div class="small" style="margin-top:10px;opacity:.8">Astuce : les cartes s’affichent en plein écran.</div>
-</div></div>
-
-<div id="panel-bag" class="panel"><div class="wrap">
-  <button class="back btn" data-close>← Retour</button>
-  <h2>Inventaire</h2>
-  <div id="bagGrid" class="grid"></div>
-</div></div>
-
-<div id="panel-dex" class="panel"><div class="wrap">
-  <button class="back btn" data-close>← Retour</button>
-  <h2>Classeur</h2>
-  <div id="dexGrid" class="grid"></div>
-</div></div>
-
-<div id="panel-shop" class="panel"><div class="wrap">
-  <button class="back btn" data-close>← Retour</button>
-  <h2>Boutique</h2>
-  <div class="grid" style="grid-template-columns:repeat(3,1fr)">
-    <button class="btn" id="daily">📦 Coffre quotidien (gratuit)</button>
-    <button class="btn" id="buyGold">🪙 +50 000 (2 000💎)</button>
-    <button class="btn" id="buyGems">💎 +2 000 (50 000🪙)</button>
-  </div>
-  <div class="small" style="margin-top:10px;opacity:.8">Les récompenses s’affichent en plein écran.</div>
-</div></div>
-
-<div id="panel-promo" class="panel"><div class="wrap">
-  <button class="back btn" data-close>← Retour</button>
-  <h2>Code promo</h2>
-  <div class="grid" style="grid-template-columns:2fr 1fr">
-    <input id="promoInput" class="btn" placeholder="MEGA-START">
-    <button class="btn" id="applyPromo">Valider</button>
-  </div>
-</div></div>
-
-<!-- OVERLAYS -->
-<div id="overlay" class="overlay">
-  <button class="back btn" id="closeOverlay" style="position:absolute;left:16px;top:16px">← Retour</button>
-  <div id="overWrap" class="overWrap"></div>
+  <div class="cards" id="overWrap"></div>
 </div>
-
-<!-- MODAL DINO -->
-<div id="modal" class="modal">
-  <div class="mwrap">
-    <button class="back btn" id="closeModal">← Retour</button>
-    <div id="modalBody"></div>
-  </div>
-</div>
-
-<div id="toast" class="toast"></div>
 
 <script>
-/* ==== Utils ==== */
-const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
-const nf=n=>Math.floor(n).toLocaleString('fr-FR');
-const rc={BASIC:'#64748b',RARE:'#38bdf8',EPIC:'#a78bfa',LEG:'#f59e0b',SUP:'#22d3b6'};
-const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+/* ======= State & Utils ======= */
+const rc = {BASIC:'#6b7b93', RARE:'#38bdf8', EPIC:'#a78bfa', LEG:'#f59e0b', SUP:'#22d3b6'};
+const rarityKey = r => r==='SUP'?'r-sup':r==='LEG'?'r-leg':r==='EPIC'?'r-epic':r==='RARE'?'r-rare':'r-basic';
+const nf = n => Math.floor(n).toLocaleString('fr-FR');
 
-/* ==== Data ==== */
-const POOL=[ // dinos
- {id:'raptor',name:'Petit Raptor',emoji:'🦕',rarity:'BASIC',hp:120,atk:8,def:2,spd:1.2},
- {id:'trike', name:'Trihorn',emoji:'🦖',rarity:'RARE',hp:160,atk:12,def:4,spd:1.2},
- {id:'ptero', name:'Aéroptère',emoji:'🦅',rarity:'EPIC',hp:140,atk:16,def:3,spd:1.0},
- {id:'rex',   name:'Rex Alpha',emoji:'🦂',rarity:'LEG',hp:190,atk:22,def:7,spd:1.1},
- {id:'spino', name:'Spino Suprême',emoji:'🐉',rarity:'SUP',hp:230,atk:28,def:9,spd:0.9}
-];
-const ITEMS=[ // objets
- {id:'sA1',cat:'atk',name:'Griffe aiguisée',val:4,rarity:'BASIC'},
- {id:'sA2',cat:'atk',name:'Crocs runiques',val:8,rarity:'RARE'},
- {id:'sA3',cat:'atk',name:'Lame du ciel',val:12,rarity:'EPIC'},
- {id:'sA4',cat:'atk',name:'Crocs stellaires',val:18,rarity:'LEG'},
- {id:'sA5',cat:'atk',name:'Épée suprême',val:26,rarity:'SUP'},
- {id:'sD1',cat:'def',name:'Cuirasse osseuse',val:2,rarity:'BASIC'},
- {id:'sD2',cat:'def',name:'Carapace dure',val:4,rarity:'RARE'},
- {id:'sD3',cat:'def',name:'Bouclier onyx',val:6,rarity:'EPIC'},
- {id:'sD4',cat:'def',name:'Mur d’obsidienne',val:10,rarity:'LEG'},
- {id:'sD5',cat:'def',name:'Rempart suprême',val:16,rarity:'SUP'},
- {id:'sH1',cat:'hp', name:'Écaille vitale',val:20,rarity:'BASIC'},
- {id:'sH2',cat:'hp', name:'Noyau primal',val:40,rarity:'RARE'},
- {id:'sH3',cat:'hp', name:'Cœur draconique',val:60,rarity:'EPIC'},
- {id:'sH4',cat:'hp', name:'Sang ancestral',val:90,rarity:'LEG'},
- {id:'sH5',cat:'hp', name:'Cœur suprême',val:140,rarity:'SUP'},
-];
-/* ==== Save ==== */
-let S=JSON.parse(localStorage.getItem("dq_deluxe")||"null")||{
- lvl:1,gold:0,gems:0,speed:1,
- collection:[],team:[],bag:[],
- enemy:null,last:performance.now()
+let S = JSON.parse(localStorage.getItem('dq_reboot')||'null') || {
+  lvl:1, gold:0, gems:0, speed:1,
+  hero:{ name:'Raptor', emoji:'🦕', rarity:'BASIC', hp:120, cur:120, atk:10, def:3, spd:1.2 },
+  enemy:null,
+  bag:[],
+  coll:[{id:'raptor', name:'Petit Raptor', emoji:'🦕', rarity:'BASIC', hp:120, atk:10, def:3, spd:1.2}],
 };
-function save(){localStorage.setItem("dq_deluxe",JSON.stringify(S));}
+function save(){ localStorage.setItem('dq_reboot', JSON.stringify(S)); }
+function ui(){ document.getElementById('lvl').textContent=S.lvl; document.getElementById('gold').textContent=nf(S.gold); document.getElementById('gems').textContent=nf(S.gems); }
 
-/* ==== Base init ==== */
-function cloneDino(base){return{uid:crypto.randomUUID(),...base,curHP:base.hp,lvl:1,exp:0,equip:{atk:null,def:null,hp:null}};}
-if(!S.collection.length){S.collection=[cloneDino(POOL[0])];}
-if(!S.team.length){S.team=[S.collection[0]];}
-/* ==== UI Head ==== */
-function ui(){ $("#lvl").textContent=S.lvl; $("#gold").textContent=nf(S.gold); $("#gems").textContent=nf(S.gems); }
-/* ==== Enemy ==== */
-function newEnemy(){
-  const emo=["🦎","🦂","🦖","🐊","🐍"][rnd(0,4)];
-  const hp=90+S.lvl*24, atk=7+Math.floor(S.lvl*1.6), def=2+Math.floor(S.lvl*0.6);
-  S.enemy={name:`Niv. ${S.lvl} — Prédateur`,emoji:emo,hp,cur:hp,atk,def};
-  $("#enemyName").textContent=S.enemy.name; $("#enemyStats").textContent=`ATK ${atk} • DEF ${def}`;
-  $("#enemyHP").style.width="100%"; $("#enemySprite").textContent=emo;
-}
-/* ==== Team render ==== */
-function totalAtk(d){const b=(d.equip.atk&&ITEMS.find(i=>i.id===d.equip.atk)?.val)||0;return d.atk+b+Math.floor((d.lvl-1)*1.5);}
-function totalDef(d){const b=(d.equip.def&&ITEMS.find(i=>i.id===d.equip.def)?.val)||0;return d.def+b+Math.floor((d.lvl-1)*0.8);}
-function totalHP(d){const b=(d.equip.hp&&ITEMS.find(i=>i.id===d.equip.hp)?.val)||0;return d.hp+b;}
-function renderTeam(){
-  const row=$("#teamRow");row.innerHTML="";
-  S.team.slice(0,5).forEach(d=>{
-    if(d.curHP>totalHP(d)) d.curHP=totalHP(d);
-    const t=document.createElement("div");t.className="te";
-    t.innerHTML=`<div class="teName">${d.emoji} ${d.name} <span style="color:${rc[d.rarity]}">• ${d.rarity}</span></div>
-    <div class="hpbar"><i style="width:${Math.round(d.curHP/totalHP(d)*100)}%"></i></div>
-    <div class="small">PV ${d.curHP}/${totalHP(d)} • ATK ${totalAtk(d)} • DEF ${totalDef(d)}</div>`;
-    t.onclick=()=>openDinoModal(d);
-    row.appendChild(t);
-  });
-  $("#allySprite").textContent=(S.team[0]||S.collection[0]).emoji;
-}
-/* ==== Combat loop ==== */
-function toast(t,ms=1400){const n=$("#toast");n.textContent=t;n.classList.add("show");setTimeout(()=>n.classList.remove("show"),ms);}
-function msg(t){$("#msg").textContent=t;}
-function loop(now){
-  const dt=(now-S.last)/1000;S.last=now;const sp=S.speed||1, step=dt*sp;
-  if(S.enemy&&S.enemy.cur>0){
-    S.team.slice(0,5).forEach(d=>{
-      d._t=(d._t||0)+step; const per=Math.max(0.6,(d.spd||1.2));
-      if(d._t>=per){d._t=0; const dmg=Math.max(1,totalAtk(d)-Math.floor(S.enemy.def*0.35)); S.enemy.cur=Math.max(0,S.enemy.cur-dmg); $("#enemyHP").style.width=(S.enemy.cur/S.enemy.hp*100)+"%";}
-    });
-    // riposte
-    S.enemy._t=(S.enemy._t||0)+step;
-    if(S.enemy._t>=1.25){S.enemy._t=0; const idx=rnd(0,Math.min(4,S.team.length-1));const d=S.team[idx];
-      if(d){const dmg=Math.max(1,S.enemy.atk-totalDef(d)); d.curHP=Math.max(0,d.curHP-dmg);}
+/* ======= Phaser Game ======= */
+class Battle extends Phaser.Scene {
+  constructor(){ super('battle'); }
+
+  preload(){}
+
+  create(){
+    // Parallax jungle (procédural)
+    const w=this.scale.width, h=this.scale.height;
+    this.cameras.main.setBackgroundColor('#0a1322');
+
+    this.bg1 = this.add.graphics().fillStyle(0x0c1a2e,1).fillRect(0,0,w,h);
+    this.bg2 = this.add.graphics().fillStyle(0x0a2238,1).fillEllipse(w*0.25,h*0.9, w*0.9, 80);
+    this.bg3 = this.add.graphics().fillStyle(0x0a2238,1).fillEllipse(w*0.75,h*0.92, w*1.1, 90);
+
+    // decorative trees
+    this.trees = this.add.group();
+    for(let i=0;i<12;i++){
+      const x = Math.random()*w, y = h*0.6 + Math.random()*h*0.35;
+      const g=this.add.graphics();
+      g.fillStyle(0x13334f,1).fillEllipse(x,y, 40, 18);
+      g.fillStyle(0x1b3d5e,1).fillTriangle(x-10,y, x+10,y, x, y-40-Math.random()*20);
+      this.trees.add(g);
     }
-    renderTeam();
+
+    // Sprites placeholders (ronds lumineux + emoji centrés)
+    this.allyBase = this.add.circle(w*0.25, h*0.75, 42, 0x123a6b).setStrokeStyle(3,0x2b7fff,0.9);
+    this.enemyBase= this.add.circle(w*0.75, h*0.55, 42, 0x5b1222).setStrokeStyle(3,0xff3b5b,0.9);
+
+    this.allyEmoji = this.add.text(this.allyBase.x, this.allyBase.y-6, S.hero.emoji, {fontFamily:'sans-serif', fontSize:48}).setOrigin(0.5);
+    this.enemyEmoji= this.add.text(this.enemyBase.x, this.enemyBase.y-6, '🦎', {fontFamily:'sans-serif', fontSize:48}).setOrigin(0.5);
+
+    // HP bars
+    this.allyHP = this.add.rectangle(this.allyBase.x-70, this.allyBase.y+50, 140, 10, 0x0b1220).setOrigin(0,0.5);
+    this.allyFill= this.add.rectangle(this.allyHP.x, this.allyHP.y, 140, 10, 0x28d0ff).setOrigin(0,0.5);
+    this.enemyHP = this.add.rectangle(this.enemyBase.x-70, this.enemyBase.y-60, 140, 10, 0x0b1220).setOrigin(0,0.5);
+    this.enemyFill= this.add.rectangle(this.enemyHP.x, this.enemyHP.y, 140, 10, 0x7dd3fc).setOrigin(0,0.5);
+
+    // Enemy stats
+    this.newEnemy();
+
+    // Idle tween
+    this.tweens.add({targets:[this.allyEmoji], y:this.allyBase.y-10, yoyo:true, duration:1200, repeat:-1, ease:'Sine.inOut'});
+    this.tweens.add({targets:[this.enemyEmoji], y:this.enemyBase.y-10, yoyo:true, duration:1400, repeat:-1, ease:'Sine.inOut'});
+
+    // Timers d’attaque
+    this.nextAlly = 0;
+    this.nextEnemy= 0;
+
+    // Vitesse
+    this.timeScale = 1;
+    ui();
   }
-  // win/defeat
-  if(S.enemy&&S.enemy.cur<=0){
-    const gold=10+S.lvl*6; S.gold+=gold; if(S.lvl%15===0){S.gems+=10; toast("Boss vaincu +10💎");}
-    S.lvl++; ui(); save(); newEnemy(); msg(`+${nf(gold)}🪙`);
-  }else if(S.team.every(d=>d.curHP<=0)){
-    S.team.forEach(d=>d.curHP=totalHP(d)); toast("Équipe vaincue — on retente !");
+
+  newEnemy(){
+    const lvl=S.lvl;
+    const hp = 90 + lvl*24;
+    const atk= 7 + Math.floor(lvl*1.6);
+    const def= 2 + Math.floor(lvl*0.6);
+    S.enemy = {name:`Prédateur Niv. ${lvl}`, emoji:'🦎', hp, cur:hp, atk, def};
+    this.enemyEmoji.setText(S.enemy.emoji);
+    this.updateBars();
   }
-  requestAnimationFrame(loop);
+
+  updateBars(){
+    const aRatio = Phaser.Math.Clamp(S.hero.cur / S.hero.hp, 0, 1);
+    const eRatio = Phaser.Math.Clamp(S.enemy.cur / S.enemy.hp, 0, 1);
+    this.allyFill.width = 140 * aRatio;
+    this.enemyFill.width = 140 * eRatio;
+  }
+
+  damagePop(x,y,txt,color=0xffffff){
+    const t = this.add.text(x,y,txt,{fontFamily:'sans-serif',fontSize:22,color:'#fff'}).setOrigin(0.5);
+    t.setTint(color);
+    this.tweens.add({targets:t, y:y-30, alpha:0, duration:450, ease:'Quad.out', onComplete:()=>t.destroy()});
+    // particules cercle
+    const p=this.add.particles(0,0,''); // dummy
+    const emitter=p.createEmitter({
+      x, y, speed:{min:-90,max:90}, angle:{min:0,max:360}, lifespan:300, quantity:12, scale:{start:0.5,end:0}, tint:color
+    });
+    this.time.delayedCall(300,()=>p.destroy());
+  }
+
+  shake(){ this.cameras.main.shake(90, 0.003); }
+
+  update(time, delta){
+    const dt = delta/1000 * (S.speed||1);
+
+    // Ally attack
+    this.nextAlly -= dt;
+    if(this.nextAlly<=0){
+      this.nextAlly = Math.max(.5, S.hero.spd);
+      const dmg = Math.max(1, S.hero.atk - Math.floor(S.enemy.def*0.35));
+      S.enemy.cur = Math.max(0, S.enemy.cur - dmg);
+      this.damagePop(this.enemyBase.x, this.enemyBase.y-70, `-${dmg}`, 0x87e8ff);
+      this.shake();
+      this.updateBars();
+    }
+
+    // Enemy attack
+    this.nextEnemy -= dt;
+    if(this.nextEnemy<=0){
+      this.nextEnemy = 1.2;
+      const dmg = Math.max(1, S.enemy.atk - S.hero.def);
+      S.hero.cur = Math.max(0, S.hero.cur - dmg);
+      this.damagePop(this.allyBase.x, this.allyBase.y-70, `-${dmg}`, 0xff879a);
+      this.updateBars();
+    }
+
+    // Win / Lose
+    if(S.enemy.cur<=0){
+      const gold = 10 + S.lvl*6;
+      S.gold += gold;
+      if(S.lvl%15===0) S.gems += 10;
+      S.lvl++; S.hero.cur = Math.min(S.hero.hp, S.hero.cur+8);
+      ui(); save();
+      this.newEnemy();
+      // reward pop
+      this.damagePop(this.enemyBase.x, this.enemyBase.y-90, `+${gold} 🪙`, 0xffd37a);
+    }else if(S.hero.cur<=0){
+      // reset héro et on retente
+      S.hero.cur = S.hero.hp; save();
+      this.damagePop(this.allyBase.x, this.allyBase.y-90, `Re-tente !`, 0xaab7ff);
+    }
+  }
 }
 
-/* ==== Panels & Menu ==== */
-function openPanel(id){$$('.panel').forEach(p=>p.classList.remove('open'));$(`#panel-${id}`).classList.add('open');$("#menu").classList.remove('open');$("#ham").setAttribute('aria-expanded','false');}
-function closePanels(){$$('.panel').forEach(p=>p.classList.remove('open'));}
-$("#ham").onclick=(e)=>{e.stopPropagation();const m=$("#menu");const open=!m.classList.contains("open");m.classList.toggle("open",open);$("#ham").setAttribute("aria-expanded",open?"true":"false");};
-document.addEventListener("click",(e)=>{const m=$("#menu"); if(!m.classList.contains("open"))return; if(e.target.closest("#menu")||e.target.closest("#ham"))return; m.classList.remove("open");$("#ham").setAttribute("aria-expanded","false");},{capture:true});
-// Ouvrir panneaux depuis menu + quickbar (délégation)
-document.addEventListener('click', (e)=>{
-  const link = e.target.closest('[data-tab]');
-  if(!link) return;
-  e.preventDefault();
-  const tab = link.dataset.tab;
-  closePanels();
-  if(tab==='improve') renderImprove();
-  if(tab==='bag')     renderBag();
-  if(tab==='dex')     renderDex();
-  openPanel(tab);
-  // referme le menu si clic venait du menu
-  if(link.closest('#menu')){
-    document.getElementById('menu').classList.remove('open');
-    document.getElementById('ham').setAttribute('aria-expanded','false');
-  }
+/* ======= Boot Phaser ======= */
+const game = new Phaser.Game({
+  type: Phaser.AUTO,
+  parent: 'game',
+  backgroundColor: '#0b1020',
+  scale: { mode: Phaser.Scale.RESIZE, autoCenter: Phaser.Scale.CENTER_BOTH, width: 800, height: 480 },
+  scene: [Battle],
+  physics: { default: 'arcade' }
 });
 
-/* ==== Improve & Modal ==== */
-function rarityClass(r){return r==='SUP'?'rSup':r==='LEG'?'rLeg':r==='EPIC'?'rEpic':r==='RARE'?'rRare':'rBasic';}
-function renderImprove(){
-  const w = $("#improveGrid");
-  w.innerHTML = "";
-
-  // affiche chaque dino de l'équipe
-  S.team.forEach((dino, i)=>{
-    const card = document.createElement("div");
-    card.className = "dino-card";
-    card.innerHTML = `
-      <div class="dino-img">
-        <img src="${dino.img}" alt="${dino.name}">
-      </div>
-      <div class="dino-info">
-        <strong>${dino.name}</strong><br>
-        LVL ${dino.lvl} - ATK ${dino.atk} - DEF ${dino.def}
-      </div>
-      <div class="dino-actions">
-        <button data-action="equip" data-id="${i}">⚔ Équiper</button>
-        <button data-action="upgrade" data-id="${i}">⬆ Améliorer</button>
-      </div>
-    `;
-    w.appendChild(card);
+/* ======= HUD JS (HTML overlay) ======= */
+function showOverlay(title, actions=[], content=[]){
+  const o=document.getElementById('overlay'), t=document.getElementById('overlayTitle'), a=document.getElementById('overlayActions'), w=document.getElementById('overWrap');
+  t.textContent=title; a.innerHTML=""; w.innerHTML="";
+  actions.forEach(b=>{ const el=document.createElement('button'); el.className='btn'; el.textContent=b.label; el.onclick=b.onClick; a.appendChild(el); });
+  content.forEach((c,i)=>{ const el=document.createElement('div'); el.className=`card ${rarityKey(c.rarity)} show`; el.style.animationDelay=(i*120)+'ms';
+    el.innerHTML=`<div class="em">${c.emoji||'🎁'}</div><div class="rn" style="color:${rc[c.rarity]||'#9cf'}">${c.rarity||''}</div><div>${c.name||''}</div>${c.extra?`<div style="opacity:.8">${c.extra}</div>`:''}`;
+    w.appendChild(el);
   });
+  o.classList.add('show');
+}
+function hideOverlay(){ document.getElementById('overlay').classList.remove('show'); }
 
-  // gestion clics sur boutons
-  w.querySelectorAll("button").forEach(btn=>{
-    btn.onclick = ()=>{
-      const id = parseInt(btn.dataset.id);
-      if(btn.dataset.action==="equip"){
-        alert(`Équiper objet sur ${S.team[id].name}`);
-      }
-      if(btn.dataset.action==="upgrade"){
-        alert(`Améliorer ${S.team[id].name}`);
-      }
-    };
-  });
-}
-  const w=$("#improveGrid");w.innerHTML="";
-  S.collection.forEach(d=>{
-    const t=document.createElement('div');t.className=`tile ${rarityClass(d.rarity)}`;
-    t.innerHTML=`<div class="kv"><b>${d.emoji} ${d.name}</b><span style="color:${rc[d.rarity]}">${d.rarity}</span></div>
-      <div class="small">Niv. ${d.lvl} • PV ${d.curHP}/${totalHP(d)} • ATK ${totalAtk(d)} • DEF ${totalDef(d)}</div>
-      <div class="small" style="margin-top:6px">Touchez pour gérer</div>`;
-    t.onclick=()=>openDinoModal(d); w.appendChild(t);
-  });
-}
-function openDinoModal(d){
-  const body=$("#modalBody");
-  body.innerHTML=`<h3 style="margin:0 0 8px 0">${d.emoji} ${d.name} <span class="small" style="color:${rc[d.rarity]}">• ${d.rarity}</span></h3>
-    <div class="small" style="margin-bottom:8px">Niv. ${d.lvl} — PV ${d.curHP}/${totalHP(d)} — ATK ${totalAtk(d)} — DEF ${totalDef(d)}</div>
-    <div class="bigActions">
-      <button class="bigBtn" id="btnUp">⬆️ Améliorer (500🪙 ${d.lvl>=15?'+ 20💎':''})</button>
-      <button class="bigBtn" id="btnEq">🧩 Équiper</button>
-    </div>
-    <div id="equipArea" style="display:none">
-      <h4>Équipement</h4>
-      <div class="slotRow">
-        ${['atk','def','hp'].map(k=>`<div class="slot"><b>${k.toUpperCase()}</b><div class="small" id="slot-${k}">${d.equip[k]?ITEMS.find(i=>i.id===d.equip[k]).name:'—'}</div><button class="btn small" data-pick="${k}">Choisir</button></div>`).join('')}
-      </div>
-    </div>`;
-  $("#btnUp").onclick=()=>{const cost=500;const gem=d.lvl>=15?20:0;if(S.gold<cost||S.gems<gem){toast("Ressources insuffisantes");return;}S.gold-=cost;S.gems-=gem;d.lvl++;d.hp+=20;d.atk+=2;d.def+=1;d.curHP=totalHP(d);ui();renderTeam();renderImprove();openDinoModal(d);save();};
-  $("#btnEq").onclick=()=>{document.getElementById('equipArea').style.display='block';};
-  document.querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>pickItem(d,b.dataset.pick));
-  $("#modal").classList.add("show");
-}
-$("#closeModal").onclick=()=>$("#modal").classList.remove("show");
-function pickItem(d,cat){
-  // overlay list of items
-  showOverlay([]);
-  const wrap=$("#overWrap"); wrap.innerHTML="";
-  const candidates=S.bag.filter(i=>i.cat===cat);
-  if(!candidates.length){wrap.innerHTML='<div class="card">Aucun objet compatible</div>';return;}
-  candidates.forEach((it,i)=>{
-    const c=document.createElement('div');c.className=`card pop ${rarityClass(it.rarity)}`;
-    c.innerHTML=`<div class="em">🎁</div><div class="rn" style="color:${rc[it.rarity]}">${it.rarity}</div><div>${it.name}</div><div class="small">+${it.val} ${cat.toUpperCase()}</div><button class="btn" data-sel="${i}">Équiper</button>`;
-    wrap.appendChild(c);
-  });
-  wrap.querySelectorAll("[data-sel]").forEach(b=>b.onclick=()=>{const it=candidates[b.dataset.sel|0]; // retire du sac
-    const idx=S.bag.indexOf(it); if(idx>-1) S.bag.splice(idx,1);
-    // remet l'ancien au sac
-    if(d.equip[cat]){const prev=ITEMS.find(x=>x.id===d.equip[cat]);if(prev)S.bag.push(prev);}
-    d.equip[cat]=it.id; renderTeam(); renderImprove(); openDinoModal(d); hideOverlay(); save();});
-}
+/* ======= Menu & Actions ======= */
+document.getElementById('btnMenu').onclick=()=>{
+  showOverlay('Menu',[
+    {label:'🎴 Tirage', onClick:openSummon},
+    {label:'🛠️ Améliorer', onClick:openImprove},
+    {label:'🎒 Inventaire', onClick:openBag},
+    {label:'🎟️ Code promo', onClick:openPromo}
+  ],[]);
+};
+document.getElementById('closeOverlay').onclick=hideOverlay;
 
-/* ==== Inventory & Dex ==== */
-function renderBag(){
-  const g=$("#bagGrid");g.innerHTML="";
-  if(!S.bag.length){g.innerHTML='<div class="tile">Inventaire vide</div>';return;}
-  S.bag.forEach(it=>{const t=document.createElement('div');t.className=`tile ${rarityClass(it.rarity)}`;t.innerHTML=`<div class="kv"><b>${it.name}</b><span style="color:${rc[it.rarity]}">${it.rarity}</span></div><div class="small">+${it.val} ${it.cat.toUpperCase()}</div>`;g.appendChild(t);});
-}
-function renderDex(){
-  const g=$("#dexGrid");g.innerHTML="";
-  const have=new Set(S.collection.map(d=>d.id));
-  POOL.forEach(p=>{const own=have.has(p.id);const t=document.createElement('div');t.className=`tile ${rarityClass(p.rarity)}`;t.style.opacity=own?1:.5;t.innerHTML=`<div class="kv"><b>${p.name}</b><span style="color:${rc[p.rarity]}">${p.rarity}</span></div><div style="font-size:40px;margin-top:8px">${p.emoji}</div><div class="small">${own?'Débloqué':'Non obtenu'}</div>`;g.appendChild(t);});
-}
+// Speed buttons
+document.querySelectorAll('[data-speed]').forEach(b=>{
+  b.onclick=()=>{ document.querySelectorAll('[data-speed]').forEach(x=>x.classList.remove('on')); b.classList.add('on'); S.speed=+b.dataset.speed; save(); };
+});
 
-/* ==== Overlay (tirage / coffre / packs / pick) ==== */
-function showOverlay(list){$("#overlay").classList.add("show"); if(list&&list.length) fillOverlay(list);}
-function hideOverlay(){$("#overlay").classList.remove("show"); $("#overWrap").innerHTML="";}
-$("#closeOverlay").onclick=hideOverlay;
-function fillOverlay(items){
-  const wrap=$("#overWrap");wrap.innerHTML="";
-  items.forEach((r,i)=>{
-    const d=document.createElement('div'); d.className=`card pop ${rarityClass(r.rarity)}`;
-    d.style.animationDelay=(i*120)+'ms';
-    d.innerHTML=`<div class="em">${r.emoji||'🎁'}</div><div class="rn" style="color:${rc[r.rarity]}">${r.rarity}</div><div>${r.name}</div>${r.extra?`<div class="small">${r.extra}</div>`:''}`;
-    wrap.appendChild(d);
-  });
-}
+/* ======= Systems ======= */
+function rollRarity(kind){ const r=Math.random(); if(kind==='item'){ if(r<.55)return'BASIC'; if(r<.83)return'RARE'; if(r<.95)return'EPIC'; if(r<.995)return'LEG'; return'SUP'; } else { if(r<.50)return'BASIC'; if(r<.80)return'RARE'; if(r<..94)return'EPIC'; if(r<.995)return'LEG'; return'SUP'; } }
+function grantItem(r){ const list=[ {name:'Griffe aiguisée',emoji:'🗡️',val:'+4 ATK'}, {name:'Cuirasse osseuse',emoji:'🛡️',val:'+2 DEF'}, {name:'Écaille vitale',emoji:'❤️',val:'+20 PV'} ]; const base=list[Math.floor(Math.random()*list.length)]; return {rarity:r,name:base.name,emoji:'🎁',extra:base.val}; }
+function grantDino(r){ const pool=[ {name:'Petit Raptor',emoji:'🦕'}, {name:'Trihorn',emoji:'🦖'}, {name:'Aéroptère',emoji:'🦅'}, {name:'Rex Alpha',emoji:'🦂'}, {name:'Spino Suprême',emoji:'🐉'} ]; const d=pool[Math.floor(Math.random()*pool.length)]; S.coll.push({id:crypto.randomUUID(),name:d.name,emoji:d.emoji,rarity:r}); return {rarity:r,name:d.name,emoji:d.emoji}; }
 
-/* ==== Summon ==== */
-function rollRarity(kind){const r=Math.random();if(kind==='item'){if(r<.55)return'BASIC';if(r<.83)return'RARE';if(r<.95)return'EPIC';if(r<.995)return'LEG';return'SUP';}else{if(r<.50)return'BASIC';if(r<.80)return'RARE';if(r<.94)return'EPIC';if(r<.995)return'LEG';return'SUP';}}
-function grantItem(r){const c=ITEMS.filter(x=>x.rarity===r);return {...c[rnd(0,c.length-1)]};}
-function grantDino(r){const c=POOL.filter(x=>x.rarity===r|| (r==='BASIC'&&x.rarity==='BASIC'));const base=c[rnd(0,c.length-1)];const d=cloneDino(base);S.collection.push(d);if(S.team.length<5)S.team.push(d);return d;}
+function openSummon(){
+  const actions=[
+    {label:'Tirage x1 (100💎)', onClick:()=>doPull(1)},
+    {label:'Tirage x10 (900💎)', onClick:()=>doPull(10)}
+  ];
+  showOverlay('Tirage', actions, []);
+}
 function doPull(n){
-  const cost=n===10?900:100;if(S.gems<cost){toast("Pas assez de gemmes");return;}S.gems-=cost;ui();
-  const out=[];for(let i=0;i<n;i++){if(Math.random()<0.6){const d=grantDino(rollRarity('dino'));out.push({type:'dino',name:d.name,emoji:d.emoji,rarity:d.rarity});}else{const it=grantItem(rollRarity('item'));S.bag.push(it);out.push({type:'item',name:it.name,emoji:'🎁',rarity:it.rarity,extra:`+${it.val} ${it.cat.toUpperCase()}`});}}
-  renderDex();renderBag();renderTeam();save(); showOverlay(out);
+  const cost = n===10?900:100; if(S.gems<cost){alert('Pas assez de gemmes');return;}
+  S.gems-=cost; ui(); save();
+  const out=[];
+  for(let i=0;i<n;i++){
+    if(Math.random()<0.6){ out.push(grantDino(rollRarity('dino'))); }
+    else{ out.push(grantItem(rollRarity('item'))); }
+  }
+  showOverlay('Résultats', [{label:'OK',onClick:hideOverlay}], out);
 }
-$("#pull1").onclick=()=>doPull(1);
-$("#pull10").onclick=()=>doPull(10);
 
-/* ==== Shop ==== */
-function daily(){
-  const k="dq_daily";const last=+localStorage.getItem(k)||0;if(Date.now()-last<86400000){toast("Déjà pris aujourd’hui");return;}
-  localStorage.setItem(k,Date.now()); const out=[{rarity:'BASIC',name:'+1000 Or',emoji:'🪙',extra:'+1000'},{rarity:'BASIC',name:'+10 Gemmes',emoji:'💎',extra:'+10'}]; S.gold+=1000;S.gems+=10;ui();save();showOverlay(out);
+function openImprove(){
+  const actions=[{label:'Fermer',onClick:hideOverlay},{label:'+ATK (500🪙)',onClick:()=>upd('atk')},{label:'+PV (500🪙)',onClick:()=>upd('hp')}];
+  const hero=S.hero;
+  showOverlay('Améliorer', actions, [{rarity:hero.rarity,name:`${hero.emoji} ${hero.name}`,emoji:hero.emoji,extra:`Niv ${S.lvl} • PV ${hero.cur}/${hero.hp} • ATK ${hero.atk} • DEF ${hero.def}`}]);
+  function upd(kind){
+    if(S.gold<500){alert('Pas assez d’or');return;}
+    S.gold-=500;
+    if(kind==='atk') S.hero.atk+=2;
+    if(kind==='hp'){ S.hero.hp+=20; S.hero.cur+=20; }
+    ui(); save();
+    openImprove();
+  }
 }
-$("#daily").onclick=daily;
-$("#buyGold").onclick=()=>{if(S.gems<2000){toast("Pas assez de gemmes");return;}S.gems-=2000;S.gold+=50000;ui();save();showOverlay([{rarity:'RARE',name:'+50 000 Or',emoji:'🪙',extra:'+50 000'}]);};
-$("#buyGems").onclick=()=>{if(S.gold<50000){toast("Pas assez d’or");return;}S.gold-=50000;S.gems+=2000;ui();save();showOverlay([{rarity:'RARE',name:'+2 000 Gemmes',emoji:'💎',extra:'+2 000'}]);};
 
-/* ==== Promo ==== */
-$("#applyPromo").onclick=()=>{const c=($("#promoInput").value||"").trim().toUpperCase();if(c==="MEGA-START"&&!localStorage.getItem("promo_ms")){localStorage.setItem("promo_ms","1");S.gold+=200000;S.gems+=50000;ui();save();showOverlay([{rarity:'LEG',name:'+200 000 Or',emoji:'🪙',extra:'+200 000'},{rarity:'LEG',name:'+50 000 Gemmes',emoji:'💎',extra:'+50 000'}]);}else toast("Code invalide ou déjà utilisé");};
+function openBag(){
+  const content=(S.bag.length? S.bag : [{rarity:'BASIC',name:'Inventaire vide',emoji:'📦'}]);
+  showOverlay('Inventaire',[{label:'Fermer',onClick:hideOverlay}],content);
+}
 
-/* ==== Start ==== */
-function start(){ui();newEnemy();renderTeam();renderDex();requestAnimationFrame(t=>{S.last=t;loop(t);});}
-start();
+function openPromo(){
+  const actions=[{label:'MEGA-START', onClick:()=>{ if(!localStorage.getItem('promo_ms')){localStorage.setItem('promo_ms','1'); S.gold+=200000; S.gems+=50000; ui(); save(); alert('Bonus appliqué'); } else alert('Déjà utilisé'); }}];
+  showOverlay('Code promo', actions, [{rarity:'LEG',name:'Astuce',emoji:'🎟️',extra:'MEGA-START → +200k or +50k gemmes'}]);
+}
+
+/* init HUD on load */
+ui();
 </script>
 </body>
 </html>
