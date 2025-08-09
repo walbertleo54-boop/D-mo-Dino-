@@ -1,130 +1,143 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Dino Quest</title>
 <style>
-  :root{
-    --bg:#0a0f1e;
-    --panel:#0f162b;
-    --panel-2:#0c1224;
-    --border:#1e2a4a;
-    --gold:#d2d8e6;
-    --gems:#8fd7ff;
-    --hp:#2fd0ff;
-    --ring:#0c132a;
-    --good:#64e0b6;
-    --bad:#ff6b6b;
-    --accent:#7de3ff;
-    --accent-2:#75c5ff;
-    --purple:#6c63ff;
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%;background:var(--bg);color:#dbe6ff;font-family:Inter,system-ui,Roboto,Arial,sans-serif;margin:0}
-  button{cursor:pointer}
-  .hud{position:fixed;top:0;left:0;right:0;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;background:linear-gradient(180deg,#0f162b,#0b1220);border-bottom:1px solid var(--border);z-index:40}
-  .brand{font-weight:800;letter-spacing:.5px}
-  .badges{display:flex;gap:10px;align-items:center;font-weight:700}
-  .badge{padding:6px 10px;border:1px solid var(--border);border-radius:12px;background:var(--panel);display:flex;gap:6px;align-items:center}
-  .i{width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center}
-  .ham{width:34px;height:34px;border-radius:10px;border:1px solid var(--border);background:var(--panel);display:grid;place-items:center}
-  .ham div{width:16px;height:2px;background:#cfe3ff;border-radius:2px;box-shadow:0 6px 0 #cfe3ff,0 -6px 0 #cfe3ff}
-  /* Scene */
-  .stage{position:fixed;inset:56px 0 0 0;overflow:hidden}
-  .scene{position:absolute;inset:0; background:
-     radial-gradient(1200px 600px at 50% 120%, #0b341c40, transparent),
-     radial-gradient(600px 300px at 75% 20%, #2d1a3d40, transparent),
-     radial-gradient(800px 400px at 25% 35%, #15374a40, transparent),
-     linear-gradient(180deg,#091225 0%, #07101f 55%, #070d18 100%);
-  }
-  /* décor simple (arbres/roches) */
-  .deco{position:absolute;opacity:.35;filter:blur(0.3px)}
-  .tree{width:10px;height:60px;background:#163c3c;border-radius:4px;box-shadow:
-    0 -14px 16px 6px #1b6a6a inset,
-    0 -30px 20px 10px #215151 inset;
-    transform:translate(-50%,-50%);
-  }
-  .lava{position:absolute;width:220px;height:20px;background:linear-gradient(90deg,#ff6b3d,#ffdd59,#ff6b3d);border-radius:50%;filter:blur(4px);opacity:.25}
-  /* enemy & ally cards */
-  .card{position:absolute;min-width:260px;max-width:300px;background:rgba(15,22,43,.9);border:1px solid var(--border);border-radius:16px;padding:12px 12px 10px 12px;box-shadow:0 8px 26px #0008}
-  .card h3{margin:0 0 6px 0;font-size:18px}
-  .line{height:9px;background:#0a1b2e;border-radius:10px;border:1px solid #09203a;overflow:hidden}
-  .hp{height:100%;background:linear-gradient(90deg,#2fd0ff,#7de3ff);width:100%;transition:width .25s}
-  .stats{opacity:.8;font-size:12px;margin-top:6px}
-  .enemy{right:18px;top:96px}
-  .ally{left:18px;bottom:120px}
-  .allyRow{display:flex;gap:12px;align-items:flex-end}
-  .allyMini{position:relative;width:140px}
-  .allyMini h4{margin:0 0 4px 0}
-  .allyMini .line{height:8px}
-  .sprite{position:absolute;bottom:18px;left:18px;width:96px;height:96px;transform-origin:center;transition:transform .2s}
-  .enemySprite{position:absolute;top:160px;right:60px;width:96px;height:96px}
-  .fx{position:absolute;pointer-events:none;mix-blend-mode:screen}
-  @keyframes hit {
-    0%{transform:translate(0,0)}
-    30%{transform:translate(8px,-6px)}
-    60%{transform:translate(-6px,5px)}
-    100%{transform:translate(0,0)}
-  }
-  /* speed panel */
-  .speed{position:fixed;right:14px;bottom:18px;display:flex;gap:10px;align-items:center;z-index:30}
-  .chip{padding:6px 10px;border:1px solid var(--border);background:var(--panel);border-radius:12px}
-  .chip.on{outline:2px solid #5d62ff}
-  .note{position:absolute;left:50%;top:14px;transform:translateX(-50%);padding:8px 12px;background:rgba(10,15,28,.8);border:1px dashed #274; color:#bfe; border-radius:12px}
-  /* menu */
-  nav.menu{position:fixed;top:56px;right:12px;width:280px;max-width:calc(100% - 24px);background:var(--panel-2);border:1px solid var(--border);border-radius:14px;display:none;flex-direction:column;z-index:60;box-shadow:0 10px 30px #0008}
-  nav.menu.open{display:flex}
-  nav.menu a{padding:12px 14px;border-bottom:1px solid var(--border);text-decoration:none;color:#dbe6ff}
-  nav.menu a:last-child{border-bottom:none}
-  /* full panels */
-  .panel{position:fixed;inset:56px 0 0 0;background:linear-gradient(180deg,#0b1220,#0a1020);display:none;z-index:55}
-  .panel.open{display:block}
-  .panel .head{display:flex;justify-content:space-between;align-items:center;padding:12px 12px;border-bottom:1px solid var(--border);background:var(--panel)}
-  .back{padding:6px 10px;border:1px solid var(--border);background:var(--panel-2);border-radius:10px}
-  .grid{padding:12px;display:grid;grid-template-columns:repeat( auto-fill, minmax(140px,1fr) );gap:12px}
-  .tile{border:1px solid var(--border);background:var(--panel);border-radius:12px;padding:10px}
-  .rar{font-size:11px;padding:2px 6px;border-radius:10px;border:1px solid var(--border)}
-  .BASIC{background:#0f1b2a}
-  .RARE{background:#1a2d4a}
-  .EPIC{background:#2a1a4a}
-  .LEG{background:#4a2a1a}
-  .SUP{background:#3d275a}
-  .center{display:grid;place-items:center}
-  .actions{display:flex;gap:10px;flex-wrap:wrap}
-  .big{padding:10px 14px;border:1px solid var(--border);background:var(--panel);border-radius:12px}
-  .gain{color:var(--good)}
-  .warn{color:#ffb86b}
-  .full{width:100%}
-  /* inventory / equip */
-  .slotRow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
-  .slot{border:1px dashed var(--border);border-radius:10px;padding:8px;min-height:58px;text-align:center}
-  .small{font-size:12px;opacity:.7}
-  /* summon animation zone */
-  .summonArea{padding:12px}
-  .cards{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-  @media(min-width:720px){.cards{grid-template-columns:repeat(5,1fr)}}
-  .cardDrop{border:1px solid var(--border);background:linear-gradient(180deg,#0e1530,#0a1020);border-radius:12px;padding:10px;animation:pop .2s ease-out;position:relative}
-  @keyframes pop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
-  .shine{position:absolute;inset:-2px;border-radius:12px;background:conic-gradient(from 0deg,transparent,rgba(125,227,255,.25),transparent);filter:blur(8px);animation:spin 2s linear infinite}
-  @keyframes spin{to{transform:rotate(1turn)}}
-  /* debug */
-  #debug{position:fixed;left:8px;bottom:8px;z-index:9999;max-width:90vw;padding:6px 8px;border:1px solid #334;border-radius:8px;background:#0b1220;color:#fbb;font:12px/1.2 monospace}
+:root{
+  --bg:#0b0f14; --bg2:#0f1622; --panel:#101826; --panel2:#0d1320;
+  --ring:#0fa3ff; --hp:#24d3ee; --gold:#cdd6f4; --gem:#7dd3fc;
+  --ok:#86efac; --warn:#fde68a; --bad:#fca5a5;
+  --text:#e6edf6; --muted:#9fb0c3; --border:#1e293b;
+  --shadow:0 8px 30px rgba(0,0,0,.35);
+}
+/* Reset + base */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;color:var(--text);font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  background: radial-gradient(90vmax 60vmax at 30% -10%, #0f2a44 0%, transparent 55%),
+              radial-gradient(80vmax 60vmax at 100% 0%, #10243a 0%, transparent 50%),
+              linear-gradient(180deg,var(--bg2),var(--bg));
+  overflow:hidden;
+}
+/* HUD top */
+.top{
+  position:fixed; inset:0 0 auto 0; height:58px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 12px; background:linear-gradient(180deg,rgba(16,24,38,.85),rgba(16,24,38,.35) 70%, transparent);
+  border-bottom:1px solid var(--border); z-index:40;
+}
+.brand{font-weight:800; letter-spacing:.5px}
+.hud{display:flex; gap:8px; align-items:center; font-weight:700}
+.badge{display:flex; gap:6px; align-items:center; padding:6px 10px;
+  border:1px solid var(--border); border-radius:12px; background:var(--panel); box-shadow:var(--shadow); }
+.g{color:var(--gold)} .j{color:var(--gem)}
+.ham{width:34px;height:34px;border-radius:10px;border:1px solid var(--border);background:var(--panel);display:grid;place-items:center}
+.ham span{width:16px;height:2px;background:#9fb0c3;position:relative;display:block}
+.ham span:before,.ham span:after{content:"";position:absolute;left:0;width:100%;height:2px;background:#9fb0c3}
+.ham span:before{top:-6px} .ham span:after{top:6px}
+
+/* Stage */
+.stage{position:absolute; inset:58px 0 0 0; overflow:hidden}
+.scene{position:absolute; inset:16px 16px 16px 16px; border-radius:18px;
+  background: radial-gradient(80vmax 50vmax at 50% 20%, rgba(29,78,216,.18), transparent 60%),
+              radial-gradient(60vmax 40vmax at 50% 100%, rgba(14,165,233,.12), transparent 55%);
+  border:1px solid var(--border);
+}
+.hint{position:absolute; top:18px; left:calc(50% - 260px); width:520px; max-width:calc(100% - 32px);
+  color:#b7e4c7; background:rgba(16,38,30,.6); border:1px dashed #2dd4bf; border-radius:12px; padding:12px;
+}
+.enemyCard{position:absolute; right:28px; top:110px; width:320px; border-radius:16px; background:linear-gradient(180deg,#0f1c2c,#0c1524);
+  padding:14px; border:1px solid var(--border); box-shadow:var(--shadow)
+}
+.cardTitle{font-weight:800; font-size:20px; margin-bottom:8px}
+.bar{height:10px;background:#0b1220;border-radius:8px;overflow:hidden;border:1px solid var(--border)}
+.bar>i{display:block;height:100%;background:var(--hp);width:100%}
+.stat{color:var(--muted); font-weight:700;letter-spacing:.3px;margin-top:8px}
+
+.teamRow{position:absolute; left:22px; bottom:110px; right:22px; height:72px; display:flex; gap:12px; align-items:center}
+.teCard{flex:1; min-width:130px; max-width:240px; border-radius:16px; background:linear-gradient(180deg,#0e1928,#0b1422);
+  border:1px solid var(--border); padding:12px; position:relative}
+.teName{font-weight:800}
+.hpbar{height:8px;margin-top:6px;background:#0a1120;border-radius:8px;border:1px solid var(--border);overflow:hidden}
+.hpbar>i{display:block;height:100%;background:var(--hp);width:100%}
+
+/* Sprites */
+.sprite, .enemySprite{
+  position:absolute; font-size:64px; filter: drop-shadow(0 12px 20px rgba(0,0,0,.5));
+  animation: idle 2.4s ease-in-out infinite;
+}
+.sprite{left:60px; bottom:205px}
+.enemySprite{right:110px; bottom:260px}
+@keyframes idle{0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)}}
+
+/* Vitesse */
+.speedBox{position:absolute; right:16px; bottom:20px; display:flex; gap:8px; align-items:center}
+.speedBox .chip{border:1px solid var(--border); background:var(--panel); border-radius:12px; padding:8px 12px; color:var(--muted)}
+.speedBox .btn{padding:8px 12px;border:1px solid var(--border);border-radius:12px;background:var(--panel);}
+.speedBox .btn.on{outline:2px solid #4f46e5}
+
+/* Particules */
+.particle{position:absolute; pointer-events:none; font-size:18px; animation: pop .5s ease-out forwards}
+@keyframes pop{from{opacity:1; transform:translateY(0) scale(1)} to{opacity:0; transform:translateY(-18px) scale(1.2)}}
+
+/* Menu & Panels */
+.menu{position:fixed; top:56px; right:14px; width:240px; background:var(--panel); border:1px solid var(--border); border-radius:16px;
+  padding:8px; box-shadow:var(--shadow); display:none; z-index:50}
+.menu.open{display:block}
+.menu a{display:block; padding:10px 12px; border-radius:10px; color:var(--text); text-decoration:none}
+.menu a:hover{background:rgba(148,163,184,.12)}
+
+.panel{
+  position:fixed; inset:0; display:none; z-index:60; background: radial-gradient(200vmax 120vmax at 50% -20%, rgba(59,130,246,.15), transparent 40%),
+                                                  linear-gradient(180deg, rgba(2,6,23,.9), rgba(2,6,23,.75));
+  backdrop-filter: blur(6px);
+}
+.panel.open{display:block}
+.panel .wrap{position:absolute; inset:70px 16px 16px 16px; border:1px solid var(--border); border-radius:16px; background:var(--panel2); padding:16px; overflow:auto}
+.panel h2{margin:0 0 12px 0}
+.pbar{height:8px;background:#0a1120;border-radius:8px;overflow:hidden;border:1px solid var(--border)}
+.pbar>i{display:block;height:100%;background:var(--hp);width:0}
+.grid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px}
+@media(min-width:560px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(min-width:820px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.tile{border:1px solid var(--border); background:linear-gradient(180deg,#0d1626,#0b1322); padding:12px; border-radius:14px}
+.kv{display:flex; justify-content:space-between; color:var(--muted); font-weight:700}
+.row{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+.btn,.sec{
+  display:inline-flex; gap:8px; align-items:center; padding:10px 14px; border-radius:12px; border:1px solid var(--border); background:var(--panel);
+  color:var(--text); text-decoration:none; font-weight:700;
+}
+.sec{background:transparent}
+.hr{height:1px;background:var(--border);margin:12px 0}
+.bad{color:var(--bad)} .ok{color:var(--ok)}
+
+.back{position:absolute; left:14px; top:14px}
+
+/* Toast */
+.toast{position:fixed; left:50%; bottom:18px; transform:translateX(-50%);
+  background:#111827dd; color:#e5e7eb; border:1px solid #374151; border-radius:12px; padding:10px 14px; z-index:90; display:none}
+.toast.show{display:block}
+
+/* Debug label (en bas à gauche) – tu peux enlever .debug pour masquer */
+.debug{position:fixed; left:10px; bottom:10px; background:#1f2937cc; border:1px solid #374151; padding:6px 10px; border-radius:10px; font-weight:700}
 </style>
 </head>
 <body>
 
-<header class="hud">
-  <div class="brand">Dino<br/>Quest</div>
-  <div class="badges">
-    <div class="badge">Lvl <span id="lvl">1</span></div>
-    <div class="badge j"><span class="i">🪙</span><span id="gold">0</span></div>
-    <div class="badge j"><span class="i">💎</span><span id="gems">0</span></div>
-    <button id="ham" class="ham" aria-label="menu" aria-expanded="false"><div></div></button>
+<!-- HUD -->
+<header class="top">
+  <div class="brand">Dino<br>Quest</div>
+  <div class="hud">
+    <div class="badge">Lvl&nbsp;<span id="lvl">1</span></div>
+    <div class="badge g">🪙&nbsp;<span id="gold">0</span></div>
+    <div class="badge j">💎&nbsp;<span id="gems">0</span></div>
+    <button id="ham" class="ham" aria-label="menu" aria-expanded="false"><span></span></button>
   </div>
 </header>
 
-<!-- MENU -->
+<!-- Menu -->
 <nav id="menu" class="menu">
   <a href="#" data-tab="improve">Améliorations</a>
   <a href="#" data-tab="summon">Tirage</a>
@@ -132,480 +145,505 @@
   <a href="#" data-tab="dex">Classeur</a>
   <a href="#" data-tab="shop">Boutique</a>
   <a href="#" data-tab="promo">Code Promo</a>
-  <a href="#" id="reset">Réinitialiser la sauvegarde</a>
 </nav>
 
-<!-- PANELS -->
-<section id="panel-improve" class="panel">
-  <div class="head"><strong>Améliorations</strong> <button class="back" data-close>Retour</button></div>
-  <div class="grid" id="improveGrid"></div>
-  <div class="center" style="padding:10px 12px;">
-    <div class="warn small">Le coût augmente avec le niveau du dino. À partir du niv. 15 : +20💎 en plus de l’or.</div>
-  </div>
-</section>
-
-<section id="panel-summon" class="panel">
-  <div class="head"><strong>Tirage</strong> <button class="back" data-close>Retour</button></div>
-  <div class="center" style="padding:12px">
-    <div class="actions">
-      <button class="big" id="onePull">Tirage 1 (100💎)</button>
-      <button class="big" id="tenPull">Tirage 10 (1000💎)</button>
-    </div>
-  </div>
-  <div class="summonArea">
-    <div id="summonDrops" class="cards"></div>
-  </div>
-</section>
-
-<section id="panel-bag" class="panel">
-  <div class="head"><strong>Inventaire (objets)</strong> <button class="back" data-close>Retour</button></div>
-  <div class="grid" id="bagGrid"></div>
-</section>
-
-<section id="panel-dex" class="panel">
-  <div class="head"><strong>Classeur</strong> <button class="back" data-close>Retour</button></div>
-  <div class="grid" id="dexGrid"></div>
-</section>
-
-<section id="panel-shop" class="panel">
-  <div class="head"><strong>Boutique</strong> <button class="back" data-close>Retour</button></div>
-  <div class="center" style="padding:12px">
-    <div class="actions">
-      <button class="big" id="daily">Coffre quotidien (gratuit)</button>
-      <button class="big" id="goldPack">+50 000🪙 (2 000💎)</button>
-      <button class="big" id="gemPack">+2 000💎 (50 000🪙)</button>
-    </div>
-  </div>
-</section>
-
-<section id="panel-promo" class="panel">
-  <div class="head"><strong>Code Promo</strong> <button class="back" data-close>Retour</button></div>
-  <div class="center" style="padding:16px">
-    <input id="promo" placeholder="Entrez votre code…" class="big" style="background:var(--panel);border:1px solid var(--border);border-radius:12px;color:#dbe6ff"/>
-    <button id="applyPromo" class="big">Valider</button>
-  </div>
-  <div class="center small" style="opacity:.8">Astuce : <code>MEGA-START</code></div>
-</section>
-
-<!-- STAGE -->
-<main class="stage">
+<!-- Stage combat -->
+<div class="stage">
   <div class="scene" id="scene">
-    <!-- décor généré en JS -->
-    <div class="note" id="msg">Combat auto — Boss toutes les 15 zones (+10💎)</div>
+    <div class="hint" id="hint">Combat auto — Boss toutes les 15 zones (+10 💎)</div>
 
-    <!-- cartes -->
-    <div class="card enemy" id="enemyCard">
-      <h3 id="enemyName">Niv. 1 — Lézard Sauvage</h3>
-      <div class="line"><div id="enemyHp" class="hp"></div></div>
-      <div class="stats" id="enemyStats">ATK 6 • DEF 2</div>
-    </div>
-
-    <div class="card ally" id="allyCard">
-      <div class="allyRow" id="allyRow"></div>
+    <div class="enemyCard" id="enemyCard">
+      <div class="cardTitle" id="enemyName">Niv. 1 — Lézard Sauvage</div>
+      <div class="bar"><i id="enemyHP"></i></div>
+      <div class="stat" id="enemyStats">ATK 6 • DEF 2</div>
     </div>
 
     <!-- sprites -->
-    <img id="allySprite" class="sprite" alt="">
-    <img id="enemySprite" class="enemySprite" alt="">
-    <div id="fxLayer" class="fx"></div>
-  </div>
-</main>
+    <div id="allySprite" class="sprite">🦕</div>
+    <div id="enemySprite" class="enemySprite">🦎</div>
 
-<!-- SPEED -->
-<div class="speed">
-  <span class="chip small">Vitesse d’attaque</span>
-  <button class="chip on" data-speed="1">x1</button>
-  <button class="chip" data-speed="2">x2</button>
-  <button class="chip" data-speed="3">x3</button>
+    <!-- barre équipe -->
+    <div class="teamRow" id="teamRow"></div>
+
+    <!-- vitesse -->
+    <div class="speedBox">
+      <span class="chip">Vitesse d’attaque</span>
+      <button class="btn on" data-speed="1">x1</button>
+      <button class="btn" data-speed="2">x2</button>
+      <button class="btn" data-speed="3">x3</button>
+    </div>
+  </div>
 </div>
 
+<!-- PANELS -->
+<div id="panel-improve" class="panel">
+  <div class="wrap">
+    <button class="sec back" data-close>← Retour</button>
+    <h2>Améliorations</h2>
+    <div id="improveWrap" class="grid"></div>
+  </div>
+</div>
+
+<div id="panel-summon" class="panel">
+  <div class="wrap">
+    <button class="sec back" data-close>← Retour</button>
+    <h2>Tirage</h2>
+    <div class="row">
+      <button class="btn" id="pull1">Tirage unique (100 💎)</button>
+      <button class="btn" id="pull10">Tirage x10 (900 💎)</button>
+    </div>
+    <div class="hr"></div>
+    <div id="summonResult" class="grid"></div>
+  </div>
+</div>
+
+<div id="panel-bag" class="panel">
+  <div class="wrap">
+    <button class="sec back" data-close>← Retour</button>
+    <h2>Inventaire</h2>
+    <div id="bagWrap" class="grid"></div>
+  </div>
+</div>
+
+<div id="panel-dex" class="panel">
+  <div class="wrap">
+    <button class="sec back" data-close>← Retour</button>
+    <h2>Classeur</h2>
+    <div id="dexWrap" class="grid"></div>
+  </div>
+</div>
+
+<div id="panel-shop" class="panel">
+  <div class="wrap">
+    <button class="sec back" data-close>← Retour</button>
+    <h2>Boutique</h2>
+    <div class="row">
+      <button class="btn" id="daily">Coffre quotidien (gratuit)</button>
+      <button class="btn" id="buyGold">+10 000 🪙 (100 💎)</button>
+    </div>
+  </div>
+</div>
+
+<div id="panel-promo" class="panel">
+  <div class="wrap">
+    <button class="sec back" data-close>← Retour</button>
+    <h2>Code promo</h2>
+    <div class="row">
+      <input id="promoInput" class="btn" style="width:220px" placeholder="Code…">
+      <button class="btn" id="applyPromo">Valider</button>
+    </div>
+    <p class="muted">Astuce : <span class="ok">MEGA-START</span> pour tester.</p>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+<div class="debug" id="debug">debug : ok</div>
+
 <script>
-/* ---------------------- DATA ---------------------- */
-const RARITIES = ["BASIC","RARE","EPIC","LEGENDARY","SUPREME"];
+/*------------------------- STATE -------------------------*/
+const $ = sel => document.querySelector(sel);
+const $$ = sel => document.querySelectorAll(sel);
+const rand = (a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+
 const POOL = [
-  {id:"raptor", name:"Petit Raptor", emoji:"🦕", rarity:"BASIC", hp:120, atk:8, def:2, spd:1.2},
-  {id:"stego",  name:"Stego-Pique", emoji:"🦖", rarity:"RARE",  hp:150, atk:10, def:4, spd:1.2},
-  {id:"dilo",   name:"Dilo-Flash", emoji:"🦎", rarity:"RARE",  hp:110, atk:12, def:3, spd:1.0},
-  {id:"trike",  name:"Tri-Corne", emoji:"🦏", rarity:"EPIC",  hp:180, atk:12, def:7, spd:1.3},
-  {id:"ptero",  name:"Ptero-Swift", emoji:"🦅", rarity:"EPIC",  hp:120, atk:15, def:4, spd:0.9},
-  {id:"rex",    name:"Rex Alpha", emoji:"🦖", rarity:"LEGENDARY", hp:220, atk:22, def:10, spd:1.1},
-  {id:"spino",  name:"Spino-Rage", emoji:"🐊", rarity:"LEGENDARY", hp:200, atk:24, def:8, spd:1.0},
-  {id:"giga",   name:"Giga-Primus", emoji:"🐉", rarity:"SUPREME", hp:300, atk:32, def:12, spd:1.0},
+  {id:'raptor', name:'Petit Raptor', emoji:'🦕', rarity:'BASIC', hp:120, atk:8, def:2, spd:1.2},
+  {id:'trike',  name:'Trihorn',      emoji:'🦖', rarity:'RARE',  hp:160, atk:12, def:4, spd:1.2},
+  {id:'ptero',  name:'Aéroptère',    emoji:'🦅', rarity:'EPIC',  hp:140, atk:16, def:3, spd:1.0},
+  {id:'rex',    name:'Rex Alpha',    emoji:'🦂', rarity:'LEG',   hp:180, atk:22, def:6, spd:1.1},
+  {id:'spino',  name:'Spino Suprême',emoji:'🐉', rarity:'SUP',   hp:220, atk:30, def:8, spd:0.9}
 ];
-const ITEM_POOL = [
-  {id:"sword", name:"Griffe affûtée", slot:"ATK",  bonus:{atk:+4},  rarity:"RARE"},
-  {id:"shell", name:"Carapace",       slot:"DEF",  bonus:{def:+3},  rarity:"RARE"},
-  {id:"heart", name:"Cœur ancien",    slot:"HP",   bonus:{hp:+30},  rarity:"EPIC"},
-  {id:"wing",  name:"Aile légère",    slot:"SPD",  bonus:{spd:-0.1},rarity:"EPIC"},
-  {id:"fang",  name:"Croc royal",     slot:"ATK",  bonus:{atk:+8},  rarity:"LEGENDARY"},
-  {id:"scale", name:"Écaille divine", slot:"DEF",  bonus:{def:+6},  rarity:"LEGENDARY"},
-  {id:"orb",   name:"Orbe azur",      slot:"HP",   bonus:{hp:+60},  rarity:"SUPREME"},
+
+const ITEMS = [
+  {id:'sword1', cat:'atk',  name:'Griffe aiguisée',  val:+4,  rarity:'BASIC'},
+  {id:'shield1',cat:'def',  name:'Cuirasse osseuse', val:+2,  rarity:'BASIC'},
+  {id:'heart1', cat:'hp',   name:'Écaille vitale',   val:+20, rarity:'BASIC'},
+  {id:'sword2', cat:'atk',  name:'Crocs runiques',   val:+8,  rarity:'RARE'},
+  {id:'shield2',cat:'def',  name:'Carapace dure',    val:+4,  rarity:'RARE'},
+  {id:'heart2', cat:'hp',   name:'Noyau primal',     val:+40, rarity:'RARE'},
+  {id:'sword3', cat:'atk',  name:'Lame du ciel',     val:+12, rarity:'EPIC'},
+  {id:'shield3',cat:'def',  name:'Bouclier onyx',    val:+6,  rarity:'EPIC'},
+  {id:'heart3', cat:'hp',   name:'Cœur draconique',  val:+60, rarity:'EPIC'},
+  {id:'sword4', cat:'atk',  name:'Crocs stellaires', val:+18, rarity:'LEG'},
+  {id:'shield4',cat:'def',  name:'Mur d’obsidienne', val:+10, rarity:'LEG'},
+  {id:'heart4', cat:'hp',   name:'Sang ancestral',   val:+90, rarity:'LEG'},
+  {id:'sword5', cat:'atk',  name:'Épée suprême',     val:+26, rarity:'SUP'},
+  {id:'shield5',cat:'def',  name:'Rempart suprême',  val:+16, rarity:'SUP'},
+  {id:'heart5', cat:'hp',   name:'Cœur suprême',     val:+140,rarity:'SUP'}
 ];
-const DROP_RATES = { BASIC:55, RARE:25, EPIC:12, LEGENDARY:7, SUPREME:1 }; // pour tirage dino
-const ENEMY_NAMES = ["Lézard Sauvage","Raptor Fielleux","Carcajou Rugissant","Rôdeur Fossile"];
-/* ---------------------- STATE ---------------------- */
-let S = JSON.parse(localStorage.getItem("dinoq_save")||"null") || {
-  lvl:1, gold:0, gems:0, speed:1,
-  team:[], collection:[], bag:[], // bag: objets
-  player:{stats:{kills:0, damageDealt:0, damageTaken:0, goldEarned:0, gemsEarned:0}}
+
+const rarityColor = {BASIC:'#64748b', RARE:'#38bdf8', EPIC:'#a78bfa', LEG:'#f59e0b', SUP:'#f43f5e'};
+
+const S = {
+  lvl:1, zone:1, speed:1,
+  gold:0, gems:0,
+  collection:[], // tous les dinos acquis
+  team:[],       // 1..5 actifs
+  bag:[],        // objets
+  equip: {},     // equip[ dinoId ] = {atk:id, def:id, hp:id}
+  enemy:null,
+  last: performance.now()
 };
-function save(){ localStorage.setItem("dinoq_save", JSON.stringify(S)); }
-/* ---------------------- UTIL ---------------------- */
-const $ = s=>document.querySelector(s);
-function rnd(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
-function pickByRate(map){
-  const total = Object.values(map).reduce((a,b)=>a+b,0);
-  let r = Math.random()*total;
-  for(const [k,v] of Object.entries(map)){ if((r-=v)<=0) return k; }
-  return "BASIC";
+
+/*--------------------- UTIL UI ---------------------*/
+function toast(msg, ms=1500){
+  const t=$("#toast"); t.textContent=msg; t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"), ms);
 }
-function baseOf(id){ return POOL.find(d=>d.id===id); }
-function makeDino(base){
-  return { uid:crypto.randomUUID(), id:base.id, name:base.name, emoji:base.emoji, rarity:base.rarity,
-    lvl:1, hp:base.hp, atk:base.atk, def:base.def, spd:base.spd, cur:base.hp,
-    equip:{HP:null,ATK:null,DEF:null,SPD:null} };
+function openPanel(id){ $(`#panel-${id}`).classList.add("open"); }
+function closePanels(){ $$(".panel").forEach(p=>p.classList.remove("open")); }
+
+/*--------------------- INIT ---------------------*/
+function cloneDino(d){
+  return {uid:crypto.randomUUID(), ...d, curHP:d.hp, lvl:1, exp:0};
 }
-function cloneDino(base){ return makeDino(baseOf(base.id||base)); }
-function applyEquip(d){
-  let hp=d.hp, atk=d.atk, def=d.def, spd=d.spd;
-  for(const k of ["HP","ATK","DEF","SPD"]){
-    const it=d.equip[k]; if(!it) continue;
-    if(it.bonus.hp) hp+=it.bonus.hp;
-    if(it.bonus.atk) atk+=it.bonus.atk;
-    if(it.bonus.def) def+=it.bonus.def;
-    if(it.bonus.spd) spd+=it.bonus.spd;
+function baseSetup(){
+  if(!S.collection.length){
+    const base = POOL.find(d=>d.rarity==="BASIC");
+    S.collection=[ cloneDino(base) ];
   }
-  return {hp,atk,def,spd};
-}
-/* ---------------------- INIT (one-time) ---------------------- */
-if(!S.collection.length){
-  S.collection = [ makeDino(POOL[0]) ];
-  S.team = S.collection.slice(0,1);
-  save();
-}
-/* ---------------------- UI HEAD ---------------------- */
-function uiHead(){ $("#lvl").textContent=S.lvl; $("#gold").textContent=S.gold.toLocaleString(); $("#gems").textContent=S.gems.toLocaleString(); }
-/* ---------------------- DECOR ---------------------- */
-function drawDecor(){
-  const sc = $("#scene");
-  sc.querySelectorAll(".deco").forEach(e=>e.remove());
-  // quelques arbres + lave selon zone
-  for(let i=0;i<6;i++){
-    const t=document.createElement("div"); t.className="deco tree";
-    t.style.left = (10 + i*15 + rnd(-5,5))+"%";
-    t.style.top  = (70 + rnd(-8,8))+"%";
-    sc.appendChild(t);
+  if(!S.team.length){
+    S.team=[ {...S.collection[0]} ];
   }
-  if( Math.floor(S.lvl/5)%2===1 ){
-    const l=document.createElement("div"); l.className="deco lava";
-    l.style.left="50%"; l.style.bottom="10%"; l.style.transform="translateX(-50%)";
-    sc.appendChild(l);
-  }
+  setWorld(S.lvl);
+  newEnemy();
+  ui();
+  renderTeam();
 }
-/* ---------------------- TEAM RENDER ---------------------- */
-function renderTeam(){
-  const row=$("#allyRow"); row.innerHTML="";
-  const team=S.team.slice(0,5);
-  team.forEach((d,i)=>{
-    const stats=applyEquip(d);
-    if(d.cur>stats.hp) d.cur=stats.hp;
-    const wrap=document.createElement("div"); wrap.className="allyMini tile"; wrap.style.width="160px";
-    wrap.innerHTML=`
-      <h4>${d.emoji} ${d.name} <span class="rar ${shortR(d.rarity)}">${d.rarity}</span></h4>
-      <div class="line"><div class="hp" style="width:${(d.cur/stats.hp*100).toFixed(1)}%"></div></div>
-      <div class="small">PV ${d.cur}/${stats.hp} • ATK ${stats.atk} • DEF ${stats.def} • VIT ${stats.spd.toFixed(1)}s</div>
-    `;
-    wrap.onclick=()=>openDinoDetail(d);
-    row.appendChild(wrap);
-  });
+function setWorld(lvl){
+  $("#lvl").textContent = lvl;
 }
-function shortR(r){ return ({BASIC:"BASIC",RARE:"RARE",EPIC:"EPIC",LEG:"LEG",LEGENDARY:"LEG",SUPREME:"SUP"})[r]||"BASIC"; }
-/* ---------------------- ENEMY ---------------------- */
-let EN = { name:"", hp:100, cur:100, atk:8, def:2, emoji:"🦎" };
+
+/*--------------------- ENEMY ---------------------*/
 function newEnemy(){
-  const count = Math.min(4, 1 + Math.floor(S.lvl/6)); // jusqu'à 4
-  const baseAtk = 6 + S.lvl*2, baseDef = 2 + Math.floor(S.lvl*0.6), baseHp = 80 + S.lvl*25;
-  EN = {name:`Niv. ${S.lvl} — ${ENEMY_NAMES[rnd(0,ENEMY_NAMES.length-1)]}`, hp:baseHp*count, cur:baseHp*count, atk:baseAtk, def:baseDef, emoji:"🦎"};
-  $("#enemyName").textContent=EN.name;
-  $("#enemyStats").textContent=`ATK ${EN.atk} • DEF ${EN.def}`;
-  setEnemyHP();
-  $("#enemySprite").src = emojiToData(EN.emoji);
+  const pool = ["🦎","🦂","🦖","🐍","🦈"];
+  const emoji = pool[rand(0,pool.length-1)];
+  const hp = 80 + S.lvl*20;
+  const atk = 6 + Math.floor(S.lvl*1.5);
+  const def = 2 + Math.floor(S.lvl/3);
+  S.enemy = {name:`Niv. ${S.lvl} — Lézard Sauvage`, emoji, hp, cur:hp, atk, def};
+  $("#enemyName").textContent = S.enemy.name;
+  $("#enemyStats").textContent = `ATK ${atk} • DEF ${def}`;
+  $("#enemyHP").style.width = "100%";
+  $("#enemySprite").textContent = emoji;
 }
-function setEnemyHP(){ $("#enemyHp").style.width = Math.max(0,(EN.cur/EN.hp)*100)+"%"; }
-/* ---------------------- SPRITES (emoji -> dataURI) ---------------------- */
-function emojiToData(emo){
-  const c=document.createElement("canvas"); c.width=128; c.height=128;
-  const ctx=c.getContext("2d"); ctx.font="96px Apple Color Emoji, Noto Color Emoji, Segoe UI Emoji";
-  ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText(emo,64,74);
-  return c.toDataURL();
+
+/*--------------------- RENDER ---------------------*/
+function renderTeam(){
+  const row=$("#teamRow"); row.innerHTML="";
+  const max = Math.max(1, Math.min(5, S.team.length));
+  for(let i=0;i<max;i++){
+    const d = S.team[i] || S.collection[0];
+    const card = document.createElement("div");
+    card.className="teCard";
+    card.innerHTML = `
+       <div class="teName">${d.name} — <span style="color:${rarityColor[d.rarity]}">${d.rarity}</span></div>
+       <div class="hpbar"><i style="width:${Math.round(d.curHP/d.hp*100)}%"></i></div>
+       <div class="stat">PV ${d.curHP}/${d.hp} • ATK ${totalAtk(d)} • DEF ${totalDef(d)}</div>
+    `;
+    row.appendChild(card);
+  }
+  $("#allySprite").textContent = (S.team[0]||S.collection[0]).emoji;
 }
-/* ---------------------- COMBAT LOOP ---------------------- */
-let last=0;
-function loop(t){
-  const dt = (t-last)/1000; last=t;
-  // autos attaques des alliés
-  for(const d of S.team){
-    if(!d._cd) d._cd=0;
-    d._cd -= dt*S.speed;
-    if(d._cd<=0){
-      d._cd = applyEquip(d).spd;
-      // dommage = atk - def/2
-      const st=applyEquip(d);
-      const dmg = Math.max(1, Math.round(st.atk - EN.def*0.35));
-      EN.cur = Math.max(0, EN.cur - dmg);
-      S.player.stats.damageDealt += dmg;
-      flashHit("#enemySprite");
-      setEnemyHP();
-      if(EN.cur<=0){ win(); break; }
+
+function ui(){
+  $("#gold").textContent = S.gold;
+  $("#gems").textContent = S.gems;
+}
+
+/*--------------------- STATS + EQUIP ---------------------*/
+function eqFor(d){
+  return S.equip[d.uid] || (S.equip[d.uid]={});
+}
+function totalAtk(d){
+  const eq = eqFor(d);
+  const bonus = [eq.atk, eq.atk2].filter(Boolean).map(id=>ITEMS.find(i=>i.id===id)?.val||0).reduce((a,b)=>a+b,0);
+  return d.atk + bonus + Math.floor((d.lvl-1)*1.5);
+}
+function totalDef(d){
+  const eq = eqFor(d);
+  const bonus = [eq.def].filter(Boolean).map(id=>ITEMS.find(i=>i.id===id)?.val||0).reduce((a,b)=>a+b,0);
+  return d.def + bonus + Math.floor((d.lvl-1)*0.8);
+}
+
+/*--------------------- COMBAT LOOP ---------------------*/
+function hit(from, to, power, isEnemy=false){
+  const n = document.createElement("div");
+  n.className="particle";
+  n.style.left = (isEnemy? (window.innerWidth-160) : 120) + rand(-10,10) + "px";
+  n.style.top  = (isEnemy?  (window.innerHeight-330) : (window.innerHeight-180)) + rand(-8,8) + "px";
+  n.textContent = "✧";
+  document.body.appendChild(n);
+  setTimeout(()=>n.remove(), 520);
+
+  const dmg = Math.max(1, power - to.def);
+  to.cur = clamp(to.cur - dmg, 0, to.cur);
+  return dmg;
+}
+
+function loop(now){
+  const dt = (now - S.last)/1000; S.last = now;
+  const step = dt * (S.speed||1);
+
+  // Allies attack sequentially
+  if(S.enemy && S.enemy.cur>0){
+    for(let i=0;i<Math.min(5,S.team.length);i++){
+      const d = S.team[i]; if(!d) continue;
+      d._t = (d._t || 0) + step;
+      const period = (d.spd || 1.2) / (S.speed||1);
+      if(d._t >= period){
+        d._t = 0;
+        const power = totalAtk(d);
+        hit(d, S.enemy, power, false);
+        S.enemy.cur = clamp(S.enemy.cur - Math.max(1, power - S.enemy.def), 0, S.enemy.hp);
+      }
     }
   }
-  // riposte globale de l’ennemi (tape la team entière)
-  if(!EN._cd) EN._cd=0;
-  EN._cd -= dt*S.speed;
-  if(EN._cd<=0){
-    EN._cd = 1.4;
-    S.team.forEach(d=>{
-      const st=applyEquip(d);
-      const dmg = Math.max(1, Math.round(EN.atk - st.def*0.4));
-      d.cur = Math.max(0, d.cur - dmg);
-      S.player.stats.damageTaken += dmg;
-      if(d.cur<=0) d.cur=0;
-    });
-    renderTeam();
-    shake("#allyCard");
-    // défaite si tous KO → on recommence la zone
-    if( S.team.every(d=>d.cur<=0) ){
-      message("Ton équipe a été vaincue. On retente !",2000);
-      S.team.forEach(d=>d.cur=applyEquip(d).hp);
-      save();
+
+  // Enemy retaliates random ally
+  if(S.enemy && S.enemy.cur>0){
+    S.enemy._t = (S.enemy._t||0) + step;
+    if(S.enemy._t >= 1.2/(S.speed||1)){ // enemy speed
+      S.enemy._t = 0;
+      const idx = rand(0, Math.min(4,S.team.length-1));
+      const d = S.team[idx]; if(d){
+        hit(S.enemy, d, S.enemy.atk, true);
+        d.curHP = clamp(d.curHP - Math.max(1, S.enemy.atk - totalDef(d)), 0, d.hp);
+      }
     }
   }
+
+  // Update bars
+  if(S.enemy){
+    $("#enemyHP").style.width = (S.enemy.cur/S.enemy.hp*100) + "%";
+  }
+  renderTeam();
+
+  // Victory / Defeat
+  if(S.enemy && S.enemy.cur<=0){
+    S.gold += 10 + S.lvl*6;
+    if(S.lvl%15===0) S.gems += 10;
+    S.lvl++; ui(); setWorld(S.lvl); newEnemy();
+  }else{
+    // team dead ?
+    const alive = S.team.some(d=>d.curHP>0);
+    if(!alive){
+      // retour début de la zone
+      S.team.forEach(d=>d.curHP=d.hp);
+      toast("Équipe vaincue — on retente la zone !");
+    }
+  }
+
   requestAnimationFrame(loop);
 }
-function flashHit(sel){
-  const el=$(sel); if(!el) return;
-  el.style.animation="hit .18s";
-  setTimeout(()=>el.style.animation="", 180);
-}
-function shake(sel){
-  const el=$(sel); if(!el) return; el.style.animation="hit .25s"; setTimeout(()=>el.style.animation="",250);
-}
-function win(){
-  S.player.stats.kills++;
-  const goldGain = 10 + 6*S.lvl;
-  S.gold += goldGain; S.player.stats.goldEarned += goldGain;
-  if(S.lvl%15===0){ S.gems+=10; S.player.stats.gemsEarned+=10; message("Boss vaincu ! +10💎",1600); }
-  S.lvl++; uiHead(); save(); newEnemy(); drawDecor(); message(`Ennemi vaincu ! +${goldGain}🪙`,1200);
-}
-/* ---------------------- PANELS / MENU ---------------------- */
-function openPanel(name){ document.querySelectorAll(".panel").forEach(p=>p.classList.remove("open")); $("#panel-"+name).classList.add("open"); $("#menu").classList.remove("open"); $("#ham").setAttribute("aria-expanded","false"); }
-function closePanels(){ document.querySelectorAll(".panel").forEach(p=>p.classList.remove("open")); }
-function message(t,ms=1200){ $("#msg").textContent=t; $("#msg").style.opacity=1; setTimeout(()=>{$("#msg").style.opacity=.75}, ms); }
-/* ---------------------- IMPROVE / EQUIP ---------------------- */
+
+/*--------------------- PANELS CONTENT ---------------------*/
 function renderImprove(){
-  const g=$("#improveGrid"); g.innerHTML="";
-  S.collection.forEach(d=>{
-    const st=applyEquip(d);
-    const cost = 500 + (d.lvl-1)*120;
-    const extraGem = d.lvl>=15 ? 20 : 0;
-    const tile=document.createElement("div"); tile.className="tile";
-    tile.innerHTML=`
-      <div class="actions" style="justify-content:space-between;">
-        <div><strong>${d.emoji} ${d.name}</strong><div class="small">Niv. ${d.lvl} • ${d.rarity}</div></div>
-        <button class="big" data-up="${d.uid}">Améliorer (${cost}🪙${extraGem?` + ${extraGem}💎`:""})</button>
+  const w=$("#improveWrap"); w.innerHTML="";
+  S.team.slice(0,5).forEach(d=>{
+    const eq=eqFor(d);
+    const t=document.createElement('div'); t.className="tile";
+    t.innerHTML=`
+      <div class="kv"><b>${d.name}</b><span style="color:${rarityColor[d.rarity]}">${d.rarity}</span></div>
+      <div class="row" style="margin-top:6px">
+        <button class="btn" data-up="hp"  data-id="${d.uid}">+20 PV (500🪙)</button>
+        <button class="btn" data-up="atk" data-id="${d.uid}">+2 ATK (500🪙)</button>
+        <button class="btn" data-up="def" data-id="${d.uid}">+1 DEF (500🪙)</button>
       </div>
-      <div class="slotRow">
-        ${["HP","ATK","DEF","SPD"].map(k=>{
-          const it=d.equip[k];
-          return `<div class="slot" data-slot="${k}" data-id="${d.uid}">
-            <div class="small">${k}</div>
-            ${it? `<div>${it.name}</div><div class="small gain">${Object.entries(it.bonus).map(([k,v])=>`${k.toUpperCase()} ${v>0?`+${v}`:v}`).join(" ")}</div>`:"<div class='small' style='opacity:.6'>vide</div>"}
-          </div>`;
-        }).join("")}
+      <div class="hr"></div>
+      <div class="kv">Équipement</div>
+      <div class="row">
+        <button class="sec" data-eq="atk" data-id="${d.uid}">ATK: ${eq.atk? ITEMS.find(i=>i.id===eq.atk).name : '—'}</button>
+        <button class="sec" data-eq="def" data-id="${d.uid}">DEF: ${eq.def? ITEMS.find(i=>i.id===eq.def).name : '—'}</button>
+        <button class="sec" data-eq="hp"  data-id="${d.uid}">PV: ${eq.hp?  ITEMS.find(i=>i.id===eq.hp ).name : '—'}</button>
       </div>
     `;
-    g.appendChild(tile);
+    w.appendChild(t);
   });
-  // actions
-  g.querySelectorAll("[data-up]").forEach(btn=>{
-    btn.onclick=()=>{
-      const d = S.collection.find(x=>x.uid===btn.dataset.up);
-      const cost = 500 + (d.lvl-1)*120;
-      const extraGem = d.lvl>=15 ? 20 : 0;
-      if(S.gold<cost || S.gems<extraGem){ message("Pas assez de ressources",1200); return; }
-      S.gold-=cost; S.gems-=extraGem;
-      d.lvl++; d.hp+=20; d.atk+=2; d.def+=1; d.cur=d.hp;
-      uiHead(); renderImprove(); renderTeam(); save();
+
+  w.querySelectorAll("[data-up]").forEach(b=>{
+    b.onclick=()=>{
+      const d = S.team.find(x=>x.uid===b.dataset.id); if(!d) return;
+      if(S.gold<500){ toast("Pas assez d’or"); return; }
+      S.gold-=500;
+      if(b.dataset.up==="hp"){ d.hp+=20; d.curHP+=20; }
+      if(b.dataset.up==="atk"){ d.atk+=2; }
+      if(b.dataset.up==="def"){ d.def+=1; }
+      ui(); renderImprove(); renderTeam();
     };
   });
-  // équiper depuis l’inventaire
-  g.querySelectorAll(".slot").forEach(slot=>{
-    slot.onclick=()=>{
-      const d = S.collection.find(x=>x.uid===slot.dataset.id);
-      const slotK = slot.dataset.slot;
-      // pick premier item compatible
-      const idx = S.bag.findIndex(it=>it.slot===slotK);
-      if(idx===-1){ message("Aucun objet compatible dans l’inventaire",1400); return; }
-      const it = S.bag.splice(idx,1)[0];
-      if(d.equip[slotK]) S.bag.push(d.equip[slotK]); // remets l’ancien dans le sac
-      d.equip[slotK]=it; renderImprove(); renderTeam(); renderBag(); save();
+  // equip depuis inventaire
+  w.querySelectorAll("[data-eq]").forEach(b=>{
+    b.onclick=()=>{
+      const d = S.team.find(x=>x.uid===b.dataset.id); if(!d) return;
+      // filtre items compatibles
+      const list = S.bag.filter(i=>i.cat===b.dataset.eq);
+      if(!list.length){ toast("Aucun objet compatible"); return; }
+      const it = list[0];
+      eqFor(d)[b.dataset.eq] = it.id;
+      // retirer 1 de l'inventaire
+      const idx = S.bag.findIndex(x=>x===it); if(idx>-1) S.bag.splice(idx,1);
+      renderImprove(); renderTeam();
     };
   });
 }
-function openDinoDetail(d){ openPanel("improve"); setTimeout(()=>{document.querySelector(`[data-up='${d.uid}']`)?.scrollIntoView({block:"center"})},50); }
-/* ---------------------- INVENTAIRE ---------------------- */
+
 function renderBag(){
-  const g=$("#bagGrid"); g.innerHTML="";
-  if(!S.bag.length){ g.innerHTML=`<div class="tile center full small" style="grid-column:1/-1;opacity:.7">Aucun objet. Ouvre la Boutique ou fais des tirages de coffres.</div>`; return; }
-  S.bag.forEach((it,i)=>{
-    const t=document.createElement("div"); t.className="tile";
-    t.innerHTML=`<div><strong>${it.name}</strong> <span class="rar ${shortR(it.rarity)}">${it.rarity}</span></div>
-    <div class="small">Slot ${it.slot}</div>
-    <div class="gain small">${Object.entries(it.bonus).map(([k,v])=>`${k.toUpperCase()} ${v>0?`+${v}`:v}`).join(" ")}</div>`;
-    g.appendChild(t);
+  const w=$("#bagWrap"); w.innerHTML="";
+  if(!S.bag.length){ w.innerHTML='<div class="tile">Inventaire vide</div>'; return; }
+  S.bag.forEach(it=>{
+    const t=document.createElement('div'); t.className="tile";
+    t.innerHTML=`<div class="kv"><b>${it.name}</b><span style="color:${rarityColor[it.rarity]}">${it.rarity}</span></div>
+                 <div class="muted">+${it.val} ${it.cat.toUpperCase()}</div>`;
+    w.appendChild(t);
   });
 }
-/* ---------------------- CLASSEUR ---------------------- */
 function renderDex(){
-  const g=$("#dexGrid"); g.innerHTML="";
+  const w=$("#dexWrap"); w.innerHTML="";
   const have=new Set(S.collection.map(d=>d.id));
-  POOL.forEach(p=>{
-    const own=have.has(p.id);
-    const t=document.createElement("div"); t.className="tile";
-    t.style.opacity=own?1:.5;
-    t.innerHTML=`<div><strong>${p.emoji} ${p.name}</strong> <span class="rar ${shortR(p.rarity)}">${p.rarity}</span></div>
-    <div class="small">${own? "Débloqué":"Non obtenu"}</div>`;
-    g.appendChild(t);
+  POOL.forEach(d=>{
+    const got = have.has(d.id);
+    const t=document.createElement('div'); t.className="tile";
+    t.style.opacity = got? 1 :.4;
+    t.innerHTML=`<div class="kv"><b>${d.name}</b><span style="color:${rarityColor[d.rarity]}">${d.rarity}</span></div>
+                 <div style="font-size:40px;margin-top:8px">${d.emoji}</div>`;
+    w.appendChild(t);
   });
 }
-/* ---------------------- TIRAGE ---------------------- */
-function pull(n=1){
-  if(n===1 && S.gems<100) return message("Pas assez de 💎",1200);
-  if(n===10 && S.gems<1000) return message("Pas assez de 💎",1200);
-  S.gems -= (n===1?100:1000); uiHead(); save();
-  const out=[];
+
+/*--------------------- SUMMON + SHOP + PROMO ---------------------*/
+function grantItem(r){
+  const pool = ITEMS.filter(x=>x.rarity===r);
+  return {...pool[rand(0,pool.length-1)]};
+}
+function grantDino(r){
+  const pool = POOL.filter(x=>x.rarity===r);
+  return cloneDino(pool[rand(0,pool.length-1)]);
+}
+function rollRarity(kind="dino"){
+  // dino rates
+  if(kind==="dino"){
+    const r = Math.random();
+    if(r<0.50) return "BASIC";
+    if(r<0.80) return "RARE";
+    if(r<0.94) return "EPIC";
+    if(r<0.995) return "LEG";
+    return "SUP";
+  }else{ // item chest
+    const r = Math.random();
+    if(r<0.55) return "BASIC";
+    if(r<0.83) return "RARE";
+    if(r<0.95) return "EPIC";
+    if(r<0.995) return "LEG";
+    return "SUP";
+  }
+}
+function doPull(n){
+  const cost = n===10? 900 : 100;
+  if(S.gems<cost){ toast("Pas assez de gemmes"); return; }
+  S.gems-=cost; ui();
+  const wrap=$("#summonResult"); wrap.innerHTML="";
   for(let i=0;i<n;i++){
-    const rar = pickByRate(DROP_RATES);
-    // 70% dino / 30% item
-    if(Math.random()<0.7){
-      // pick dino de cette rareté
-      const choices = POOL.filter(p=>p.rarity===rar);
-      const base = choices[rnd(0,choices.length-1)];
-      const d = makeDino(base);
-      S.collection.push(d);
-      if(S.team.length<5) S.team.push(d);
-      out.push({type:"dino", item:d});
+    const isDino = Math.random()<0.6; // 60% dino, 40% item
+    if(isDino){
+      const d = grantDino(rollRarity("dino")); S.collection.push(d);
+      const t=document.createElement('div'); t.className="tile"; t.style.borderColor=rarityColor[d.rarity];
+      t.innerHTML=`<div class="kv"><b>${d.name}</b><span style="color:${rarityColor[d.rarity]}">${d.rarity}</span></div>
+                   <div style="font-size:38px;margin-top:6px">${d.emoji}</div>`;
+      wrap.appendChild(t);
     }else{
-      const choices = ITEM_POOL.filter(p=>p.rarity===rar || rar==="BASIC");
-      const it = JSON.parse(JSON.stringify(choices[rnd(0,choices.length-1)]));
-      S.bag.push(it); out.push({type:"item", item:it});
+      const it = grantItem(rollRarity("item")); S.bag.push(it);
+      const t=document.createElement('div'); t.className="tile"; t.style.borderColor=rarityColor[it.rarity];
+      t.innerHTML=`<div class="kv"><b>${it.name}</b><span style="color:${rarityColor[it.rarity]}">${it.rarity}</span></div>
+                   <div class="muted">+${it.val} ${it.cat.toUpperCase()}</div>`;
+      wrap.appendChild(t);
     }
   }
-  renderTeam(); renderBag(); renderDex(); save();
-  // animation d’affichage
-  const zone=$("#summonDrops"); zone.innerHTML="";
-  out.forEach(r=>{
-    const c=document.createElement("div"); c.className="cardDrop";
-    const shine=document.createElement("div"); shine.className="shine"; c.appendChild(shine);
-    if(r.type==="dino"){
-      c.innerHTML += `<div style="font-size:22px">${r.item.emoji} ${r.item.name}</div>
-      <div class="small">Rareté: <b>${r.item.rarity}</b></div>`;
-    }else{
-      c.innerHTML += `<div style="font-size:16px">${r.item.name}</div>
-      <div class="small">Objet • ${r.item.slot}</div>
-      <div class="gain small">${Object.entries(r.item.bonus).map(([k,v])=>`${k.toUpperCase()} ${v>0?`+${v}`:v}`).join(" ")}</div>`;
-    }
-    zone.appendChild(c);
-  });
+  renderDex(); renderBag();
 }
-/* ---------------------- BOUTIQUE ---------------------- */
-function canClaimDaily(){
-  const last=+(localStorage.getItem("dinoq_daily")||0);
-  return Date.now() - last > 24*3600*1000;
+function dailyChest(){
+  const key="dino_daily";
+  const last=+localStorage.getItem(key)||0;
+  const now=Date.now();
+  if(now-last<24*3600*1000){ toast("Déjà pris aujourd’hui"); return; }
+  localStorage.setItem(key, now);
+  S.gold+=rand(500,2000); S.gems+=10; ui(); toast("Coffre quotidien ouvert !");
 }
-function claimDaily(){
-  if(!canClaimDaily()){ message("Déjà pris aujourd’hui",1200); return; }
-  S.gold+=1000; S.gems+=10; uiHead(); save();
-  localStorage.setItem("dinoq_daily", Date.now()+"");
-  message("Coffre quotidien : +1000🪙 +10💎",1500);
+function applyPromo(code){
+  if(code==="MEGA-START" && !localStorage.getItem("promo_ms")){
+    localStorage.setItem("promo_ms","1");
+    S.gold+=200000; S.gems+=50000; ui(); toast("Bonus ajouté !");
+  }else{
+    toast("Code invalide ou déjà utilisé");
+  }
 }
-/* ---------------------- HOOKS & CONTROLS ---------------------- */
+
+/*--------------------- MENU + PANELS + SPEED ---------------------*/
 function hooks(){
   // hamburger
   const ham=$("#ham"), menu=$("#menu");
-  ham.onclick=(e)=>{ e.stopPropagation(); menu.classList.toggle("open"); ham.setAttribute("aria-expanded", menu.classList.contains("open")); };
-  document.addEventListener("click",()=>menu.classList.remove("open"));
+  ham.addEventListener("click",(e)=>{
+    e.stopPropagation();
+    const open = !menu.classList.contains("open");
+    menu.classList.toggle("open", open);
+    ham.setAttribute("aria-expanded", open?"true":"false");
+  });
+  document.addEventListener("click",(e)=>{
+    if(!menu.classList.contains("open")) return;
+    if(e.target.closest("#menu")||e.target.closest("#ham")) return;
+    menu.classList.remove("open"); ham.setAttribute("aria-expanded","false");
+  }, {capture:true});
 
-  // tabs open
-  menu.querySelectorAll("[data-tab]").forEach(a=>{
-    a.onclick=(e)=>{ e.preventDefault(); openPanel(a.dataset.tab);
-      if(a.dataset.tab==="improve") renderImprove();
-      if(a.dataset.tab==="bag") renderBag();
-      if(a.dataset.tab==="dex") renderDex();
+  // open panels
+  $$("#menu a").forEach(a=>{
+    a.onclick=(ev)=>{
+      ev.preventDefault();
+      menu.classList.remove("open"); ham.setAttribute("aria-expanded","false");
+      const tab=a.dataset.tab;
+      if(tab==="improve"){ renderImprove(); }
+      if(tab==="bag"){ renderBag(); }
+      if(tab==="dex"){ renderDex(); }
+      openPanel(tab);
     };
   });
-  // close buttons
-  document.querySelectorAll("[data-close]").forEach(b=> b.onclick=()=>closePanels() );
+  // back buttons
+  $$("[data-close]").forEach(b=>b.onclick=()=>closePanels());
 
   // speed
-  document.querySelectorAll("[data-speed]").forEach(b=>{
-    b.onclick=()=>{ document.querySelectorAll(".chip").forEach(x=>x.classList.remove("on")); b.classList.add("on"); S.speed=+b.dataset.speed; save(); }
+  $$("[data-speed]").forEach(b=>{
+    b.onclick=()=>{
+      S.speed=+b.dataset.speed;
+      $$("[data-speed]").forEach(x=>x.classList.toggle("on", x===b));
+    };
   });
 
   // summon
-  $("#onePull").onclick=()=>pull(1);
-  $("#tenPull").onclick=()=>pull(10);
+  $("#pull1").onclick=()=>doPull(1);
+  $("#pull10").onclick=()=>doPull(10);
 
   // shop
-  $("#daily").onclick=()=>claimDaily();
-  $("#goldPack").onclick=()=>{ if(S.gems<2000) return message("Pas assez de 💎",1200); S.gems-=2000; S.gold+=50000; uiHead(); save(); message("+50 000🪙",900); };
-  $("#gemPack").onclick=()=>{ if(S.gold<50000) return message("Pas assez d’or",1200); S.gold-=50000; S.gems+=2000; uiHead(); save(); message("+2 000💎",900); };
+  $("#daily").onclick=dailyChest;
+  $("#buyGold").onclick=()=>{
+    if(S.gems<100){ toast("Pas assez de gemmes"); return; }
+    S.gems-=100; S.gold+=10000; ui(); toast("+10 000 or");
+  };
 
   // promo
   $("#applyPromo").onclick=()=>{
-    const c=$("#promo").value.trim().toUpperCase();
-    if(c==="MEGA-START"){ S.gold+=200000; S.gems+=50000; uiHead(); save(); message("Bonus appliqué !",1200); }
-    else message("Code invalide",1000);
+    applyPromo( ($("#promoInput").value||"").trim().toUpperCase() );
   };
-
-  // reset
-  $("#reset").onclick=(e)=>{ e.preventDefault();
-    if(confirm("Effacer la sauvegarde ?")){ localStorage.removeItem("dinoq_save"); location.reload(); }
-  });
 }
-/* ---------------------- START ---------------------- */
+
+/*--------------------- START ---------------------*/
 function start(){
-  uiHead();
-  drawDecor();
-  // équipe de base (max 5)
-  S.team = S.team.slice(0,5);
-  renderTeam();
-  // sprites init
-  $("#allySprite").src = emojiToData((S.team[0]||S.collection[0]).emoji);
-  $("#enemySprite").src = emojiToData("🦎");
-  newEnemy();
+  baseSetup();
   hooks();
-  requestAnimationFrame(t=>{ last=t; loop(t); });
+  // init speed buttons state
+  $$("[data-speed]").forEach(b=>b.classList.toggle("on", +b.dataset.speed===S.speed));
+  requestAnimationFrame(t=>{ S.last=t; loop(t); });
 }
-document.addEventListener("DOMContentLoaded", start);
-</script>
 
-<!-- DEBUG OVERLAY (garde-le pendant qu’on itère ; tu pourras le supprimer après) -->
-<script>
-(function(){
-  const box = document.createElement('div');
-  box.id='debug'; box.textContent='debug: ok'; document.body.appendChild(box);
-  window.addEventListener('error', e=>{
-    box.textContent = 'JS error → ' + (e.message||'') + ' @ ' + (e.filename||'') + ':' + (e.lineno||'');
-  });
-  window.addEventListener('unhandledrejection', e=>{
-    box.textContent = 'Promise error → ' + (e.reason && (e.reason.message||e.reason));
-  });
-  const need = ['scene','allyRow','enemyCard','ham','menu'];
-  const missing = need.filter(id=>!document.getElementById(id));
-  if(missing.length) box.textContent = 'Manque éléments DOM: '+missing.join(', ');
-})();
+start();
 </script>
-
 </body>
 </html>
