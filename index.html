@@ -329,13 +329,63 @@ function openPanel(id){$$('.panel').forEach(p=>p.classList.remove('open'));$(`#p
 function closePanels(){$$('.panel').forEach(p=>p.classList.remove('open'));}
 $("#ham").onclick=(e)=>{e.stopPropagation();const m=$("#menu");const open=!m.classList.contains("open");m.classList.toggle("open",open);$("#ham").setAttribute("aria-expanded",open?"true":"false");};
 document.addEventListener("click",(e)=>{const m=$("#menu"); if(!m.classList.contains("open"))return; if(e.target.closest("#menu")||e.target.closest("#ham"))return; m.classList.remove("open");$("#ham").setAttribute("aria-expanded","false");},{capture:true});
-$$('#menu a, .qbtn').forEach(a=>a.onclick=(ev)=>{ev.preventDefault();const tab=a.dataset.tab;if(tab==="improve")renderImprove();if(tab==="bag")renderBag();if(tab==="dex")renderDex();openPanel(tab);});
-$$('[data-close]').forEach(b=>b.onclick=()=>closePanels());
-$$('[data-speed]').forEach(b=>b.onclick=()=>{$$('[data-speed]').forEach(x=>x.classList.remove('on'));b.classList.add('on');S.speed=+b.dataset.speed;save();});
+// Ouvrir panneaux depuis menu + quickbar (délégation)
+document.addEventListener('click', (e)=>{
+  const link = e.target.closest('[data-tab]');
+  if(!link) return;
+  e.preventDefault();
+  const tab = link.dataset.tab;
+  closePanels();
+  if(tab==='improve') renderImprove();
+  if(tab==='bag')     renderBag();
+  if(tab==='dex')     renderDex();
+  openPanel(tab);
+  // referme le menu si clic venait du menu
+  if(link.closest('#menu')){
+    document.getElementById('menu').classList.remove('open');
+    document.getElementById('ham').setAttribute('aria-expanded','false');
+  }
+});
 
 /* ==== Improve & Modal ==== */
 function rarityClass(r){return r==='SUP'?'rSup':r==='LEG'?'rLeg':r==='EPIC'?'rEpic':r==='RARE'?'rRare':'rBasic';}
 function renderImprove(){
+  const w = $("#improveGrid");
+  w.innerHTML = "";
+
+  // affiche chaque dino de l'équipe
+  S.team.forEach((dino, i)=>{
+    const card = document.createElement("div");
+    card.className = "dino-card";
+    card.innerHTML = `
+      <div class="dino-img">
+        <img src="${dino.img}" alt="${dino.name}">
+      </div>
+      <div class="dino-info">
+        <strong>${dino.name}</strong><br>
+        LVL ${dino.lvl} - ATK ${dino.atk} - DEF ${dino.def}
+      </div>
+      <div class="dino-actions">
+        <button data-action="equip" data-id="${i}">⚔ Équiper</button>
+        <button data-action="upgrade" data-id="${i}">⬆ Améliorer</button>
+      </div>
+    `;
+    w.appendChild(card);
+  });
+
+  // gestion clics sur boutons
+  w.querySelectorAll("button").forEach(btn=>{
+    btn.onclick = ()=>{
+      const id = parseInt(btn.dataset.id);
+      if(btn.dataset.action==="equip"){
+        alert(`Équiper objet sur ${S.team[id].name}`);
+      }
+      if(btn.dataset.action==="upgrade"){
+        alert(`Améliorer ${S.team[id].name}`);
+      }
+    };
+  });
+}
   const w=$("#improveGrid");w.innerHTML="";
   S.collection.forEach(d=>{
     const t=document.createElement('div');t.className=`tile ${rarityClass(d.rarity)}`;
